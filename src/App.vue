@@ -5,8 +5,9 @@ import Jeu from './components/jeu.vue';
 
 <template>
   
-  <Exemple></Exemple>
 
-<Jeu></Jeu>
+  <Exemple></Exemple>
+  <Jeu></Jeu>
 
 </template>
+
