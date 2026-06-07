@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import Exemple from './components/exemple.vue';
-import Jeu from './components/jeu.vue';
+import Jetonretourner from './components/jetonretourner.vue';
+
 </script>
 
 <template>
   
 
-  <Exemple></Exemple>
-  <Jeu></Jeu>
+  <jetonretourner />
 
 </template>
 

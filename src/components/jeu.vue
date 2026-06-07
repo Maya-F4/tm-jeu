@@ -15,4 +15,4 @@ const score = ref(0)
      
 
   </div>
-</template>
+</template> 
