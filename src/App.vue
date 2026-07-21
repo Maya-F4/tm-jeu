@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import Jetonretourner from './components/jetonretourner.vue';
+import Binoxxo from './components/binoxxo.vue';
 
 </script>
 
 <template>
   
 
-  <jetonretourner />
+  <binoxxo />
 
 </template>
 
