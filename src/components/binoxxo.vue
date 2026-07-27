@@ -86,6 +86,8 @@ function equilibre(Ligne) {
     return true
 }
 
+const mode = ref<null | 0 | 1>(null)
+
 </script>
 <template>
     <div>
@@ -99,6 +101,17 @@ function equilibre(Ligne) {
                 
             </div>
         </template>
+    </div>
+    <div>
+        <button 
+        class="bg-blue-400 border-blue-500 rounded-2xl text-white p-2 m-2 hover:bg-blue-500"
+        @click="mode=0">Mode 0</button>
+        <button 
+        class="bg-blue-400 border-blue-500 rounded-2xl text-white p-2 m-2 hover:bg-blue-500"
+        @click="mode=1">Mode 1</button>
+    </div>
+    <div>
+        <p>Mode actuel: {{ mode ?? 'Aucun' }}</p>
     </div>
 </template> 
 
