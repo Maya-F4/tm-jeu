@@ -10,6 +10,8 @@ const grille = ref([
     [1, null, 0, null, null, 1],
 ])
 
+const copieGrilleInitiale = JSON.parse(JSON.stringify(grille.value))
+
 function afficherLigne(numero: number) {
     console.log(grille.value[numero])
 }
@@ -88,6 +90,23 @@ function equilibre(Ligne) {
 
 const mode = ref<null | 0 | 1>(null)
 
+function caseModifiable(L ,C) {
+    if (copieGrilleInitiale[L][C] === null) {
+        return true
+    }
+    return false
+}
+
+function jouerCase(L ,C) {
+    if (caseModifiable(L ,C) === false) {
+        return
+    }
+    if (mode.value === null) {
+        return
+    }
+    grille.value[L][C] = mode.value
+}
+
 </script>
 <template>
     <div>
@@ -96,9 +115,9 @@ const mode = ref<null | 0 | 1>(null)
     <div class="grid grid-cols-6 gap-1 w-fit">
         <template v-for="(Ligne, L) in grille" :key="L" >
             <div v-for="(Case_, C) in Ligne" :key="C" 
-                class="w-10 h-10 border border-gray-300 text-center">
+                class="w-10 h-10 border border-gray-300 text-center"
+                @click= "jouerCase(L , C)">
                 {{ Case_ ?? '.' }}
-                
             </div>
         </template>
     </div>

@@ -19,7 +19,7 @@
 - Conseil : lancer `npm run dev` régulièrement pour voir l'état réel de l'app pendant le développement.
 - Prochaine étape suggérée : terminer soi-même la fonction `equilibre(ligne)`, avec des questions pour guider la réflexion (pas de code fourni).
 
-## 2026-07-26 — Début de l'interactivité (mode 0/1 + boutons)
+## 2026-07-26 — Grille interactive et jouable
 
 ### Décisions prises
 - La 3ème règle du Binoxxo (unicité des lignes/colonnes) est mise de côté pour l'instant, priorité donnée à l'interactivité de la grille.
@@ -36,7 +36,21 @@
 - Différence entre une chaîne de caractères `"null"`/`'0'`/`'1'` et les vraies valeurs `null`/`0`/`1` — piège repéré et corrigé dans la déclaration de `mode`.
 - Fonctionnement de `@click` en Vue (exécute une instruction ou appelle une fonction au clic), et règle du `.value` : nécessaire dans le `<script>`, mais Vue l'enlève automatiquement dans le `<template>`.
 
+### Suite de la session : cases fixes vs modifiables, et clic sur une case
+- Nouvelle constante `copieGrilleInitiale = JSON.parse(JSON.stringify(grille.value))`, créée juste après `grille` : une copie indépendante de l'état de départ, pour toujours pouvoir savoir quelles cases étaient vides au départ (donc jouables) et lesquelles faisaient partie de l'énoncé (donc fixes).
+  - Première tentative avec `structuredClone(grille.value)`, qui plantait l'app entièrement (page blanche) avec l'erreur `DataCloneError`. Cause : `grille.value` n'est pas un tableau "normal" mais un proxy réactif de Vue, que `structuredClone` ne sait pas cloner. Remplacé par `JSON.parse(JSON.stringify(...))`, qui ne garde que les données brutes (nombres/`null`) sans le mécanisme réactif — ça a résolu le plantage.
+- Fonction `caseModifiable(L, C)` : retourne `true`/`false` selon que la case était `null` dans `copieGrilleInitiale`.
+- Fonction `jouerCase(L, C)` : ne fait rien (`return` seul) si la case n'est pas modifiable, ni si aucun mode n'est sélectionné (`mode.value === null`) ; sinon, met à jour `grille.value[L][C] = mode.value`.
+- `@click="jouerCase(L, C)"` ajouté sur la `div` de chaque case dans le `<template>`, au même niveau que `class` et `:key` (pas comme contenu affiché).
+- **Résultat testé et fonctionnel** : la grille est maintenant jouable — on choisit un mode (0 ou 1), on clique sur une case vide pour la remplir, et les cases de départ restent bien protégées contre les clics.
+
+### Notions expliquées (suite)
+- Structure d'une balise HTML : attributs (`class`, `:key`, `@click`) dans la balise ouvrante, contenu affiché entre balise ouvrante et fermante.
+- Les deux boucles `v-for` imbriquées (lignes puis colonnes) pour parcourir la grille dans le template.
+- `return` seul (sans valeur) pour arrêter l'exécution d'une fonction ("ne rien faire") à une condition donnée.
+- Pourquoi `structuredClone` échoue sur les données réactives de Vue, et pourquoi `JSON.parse(JSON.stringify(...))` fonctionne pour une grille de nombres/`null`.
+- Méthode de débogage : lire les erreurs dans le terminal (erreurs de compilation) vs dans la console du navigateur (erreurs d'exécution), et l'utilité de vider la console + recharger la page après un plantage.
+
 ### Prochaine étape (à faire la prochaine fois)
-- Distinguer les cases "données" (valeurs de départ, non modifiables) des cases "à jouer" (vides au départ) — probablement via une copie de la grille de départ à comparer avec `grille`.
-- Écrire la fonction de clic sur une case (ex. `jouerCase(L, C)`) qui n'agit que sur les cases modifiables et applique la valeur de `mode`.
-- Une fois la grille jouable, relier `vérifierGrille()` pour afficher si la grille est valide.
+- Relier `vérifierGrille()` à l'affichage, pour montrer si la grille est valide/invalide en direct pendant que Maya joue.
+- Implémenter la 3ème règle du Binoxxo (unicité des lignes/colonnes), mise de côté jusqu'ici.
