@@ -65,6 +65,12 @@ function vérifierGrille() {
             return false
         }
     }
+    if(unicitéLignes() === false) {
+        return false
+    }
+    if(unicitéColonnes() === false) {
+        return false
+    }
     return true
 }
 
@@ -105,7 +111,65 @@ function jouerCase(L ,C) {
         return
     }
     grille.value[L][C] = mode.value
+    dernierCoup.value = {L ,C}
 }
+
+const dernierCoup = ref<null | {L: number, C: number}>(null)
+
+/*function dernierCoupErreur(L ,C){
+    if (dernierCoup.value === null) {
+        return false
+    }
+    if ( dernierCoup.value.L === L && dernierCoup.value.C === C && vérifierGrille() === false) {
+        return true
+    }
+    return false
+}
+    
+:class="{ 'bg-red-200':dernierCoupErreur(L, C) }" 
+dans le template pour colorer la case du dernier coup si la grille est invalide.
+*/
+
+function ligneComplete(Ligne){
+    for (let C = 0 ; C < 6 ; C=C+1) {
+        if (Ligne[C] === null) {
+            return false
+        }
+    }
+    return true
+}
+
+function ligneIdentique (Ligne1 , Ligne2) {
+    for (let C=0 ; C < 6 ; C=C+1) {
+        if (Ligne1[C]!== Ligne2[C]) {
+            return false
+        }
+    }
+    return true
+}
+
+function unicitéLignes() {
+    for (let Lx=0 ; Lx < 6 ; Lx=Lx+1){
+        for (let Ly=Lx+1 ; Ly < 6 ; Ly=Ly+1){
+            if( ligneComplete(grille.value[Lx]) && ligneComplete(grille.value[Ly]) && ligneIdentique(grille.value[Lx],grille.value[Ly]) ) {
+                return false
+            }
+        }
+    }
+    return true
+}
+
+function unicitéColonnes() {
+    for (let Cx=0 ; Cx < 6 ; Cx=Cx+1){
+        for (let Cy=Cx+1 ; Cy < 6 ; Cy=Cy+1){
+            if( ligneComplete(getColonne(Cx)) && ligneComplete(getColonne(Cy)) && ligneIdentique(getColonne(Cx),getColonne(Cy)) ) {
+                return false
+            }
+        }
+    }
+    return true
+}
+
 
 </script>
 <template>
@@ -131,6 +195,9 @@ function jouerCase(L ,C) {
     </div>
     <div>
         <p>Mode actuel: {{ mode ?? 'Aucun' }}</p>
+    </div>
+    <div>
+        <p>Etat de la grille: {{ vérifierGrille() ? 'Valide' : 'Invalide' }}</p>
     </div>
 </template> 
 

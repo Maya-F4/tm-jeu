@@ -54,3 +54,46 @@
 ### Prochaine étape (à faire la prochaine fois)
 - Relier `vérifierGrille()` à l'affichage, pour montrer si la grille est valide/invalide en direct pendant que Maya joue.
 - Implémenter la 3ème règle du Binoxxo (unicité des lignes/colonnes), mise de côté jusqu'ici.
+
+## 2026-07-28 — Affichage de la validité + case en erreur en rouge
+
+### Ce qui a été codé dans `src/components/binoxxo.vue`
+- Affichage en direct de la validité de la grille : `<p>Etat de la grille: {{ vérifierGrille() ? 'Valide' : 'Invalide' }}</p>`. Comme `vérifierGrille()` lit `grille.value`, Vue réévalue automatiquement ce texte à chaque coup joué.
+- Feedback visuel en rouge sur la dernière case jouée si elle casse une règle :
+  - `dernierCoup` : `const dernierCoup = ref<null | {L: number, C: number}>(null)`, mis à jour dans `jouerCase` (`dernierCoup.value = {L, C}`) à chaque coup valide joué.
+  - `dernierCoupErreur(L, C)` : retourne `true` seulement si `dernierCoup.value` correspond exactement à la case `(L, C)` **et** que `vérifierGrille()` est `false` — simplification décidée pendant la session : pas besoin de revérifier la ligne/colonne isolément, puisqu'un coup ne modifie qu'une case, donc si la grille devient invalide juste après ce coup, le problème vient forcément de sa ligne ou de sa colonne.
+  - `:class="{ 'bg-red-200': dernierCoupErreur(L, C) }"` ajouté sur la `div` de chaque case, en plus de la `class` statique existante (Vue fusionne les deux automatiquement).
+- **Résultat testé et fonctionnel** : le texte "Valide"/"Invalide" se met à jour en direct, et la dernière case jouée s'affiche en rouge quand elle casse une règle.
+
+### Notions expliquées pendant la session
+- L'opérateur ternaire `condition ? valeurSiVrai : valeurSiFaux` (raccourci d'un `if/else` qui produit une valeur), comparé à l'opérateur `??` déjà connu.
+- Le style conditionnel en Vue avec `:class="{ 'classe': condition }"`, et le fait que `class` (statique) et `:class` (dynamique) peuvent coexister sur une même balise.
+- Accès aux propriétés d'un objet stocké dans un `ref` (ex. `dernierCoup.value.L`), et pourquoi comparer à la fois la ligne **et** la colonne est nécessaire pour identifier une case unique parmi les 36 (comparer une seule coordonnée désignerait toute une ligne ou toute une colonne, pas une case précise).
+- Pourquoi le code d'une fonction (comme `jouerCase`) peut utiliser une variable déclarée plus loin dans le fichier (comme `dernierCoup`) sans planter : le corps de la fonction ne s'exécute qu'au moment de l'appel (au clic), pas à la déclaration — bonne pratique de lisibilité malgré tout de déclarer les variables avant.
+
+### Prochaine étape (à faire la prochaine fois)
+- Implémenter la 3ème règle du Binoxxo (unicité des lignes/colonnes), toujours en attente.
+- Réfléchir à l'objectif à plus long terme de génération aléatoire de grilles (évoqué précédemment), une fois les règles de validation complètes.
+
+## 2026-07-29 — 3ème règle : unicité des lignes/colonnes
+
+### Décision prise
+- La règle ne s'applique qu'aux lignes/colonnes **complètes** (sans `null`) : deux lignes encore partiellement vides ne sont pas comparées, pour éviter de signaler une erreur qui n'en est pas encore une.
+- Le peaufinage visuel de la case en rouge (`dernierCoupErreur`) est mis en pause pour l'instant — le code correspondant a été commenté dans `binoxxo.vue` (fonction + `:class` retirée du template), à reprendre plus tard.
+
+### Ce qui a été codé dans `src/components/binoxxo.vue`
+- `ligneComplete(Ligne)` : retourne `false` dès qu'un `null` est trouvé dans les 6 cases, `true` sinon. Fonctionne aussi bien pour une ligne que pour une colonne (peu importe l'origine du tableau passé en paramètre).
+- `ligneIdentique(Ligne1, Ligne2)` : compare deux tableaux de 6 valeurs case par case, retourne `false` dès qu'une différence est trouvée, `true` si tout est identique.
+- `unicitéLignes()` : double boucle (`Lx` de 0 à 5, `Ly` de `Lx+1` à 5, pour ne comparer chaque paire qu'une seule fois et ne jamais comparer une ligne à elle-même) qui retourne `false` si deux lignes complètes et identiques sont trouvées.
+- `unicitéColonnes()` : même principe, en réutilisant `getColonne(Cx)`/`getColonne(Cy)` à la place des lignes.
+- Les deux fonctions intégrées dans `vérifierGrille()`, avec le même pattern que les vérifications existantes (`if (xxx() === false) { return false }`).
+- **Résultat testé et fonctionnel** : les 3 règles du Binoxxo sont maintenant toutes prises en compte dans `vérifierGrille()` (pas de triplet, équilibre des 0/1, unicité des lignes/colonnes complètes).
+
+### Notions expliquées pendant la session
+- En JavaScript, `===` sur des tableaux compare la référence (le même tableau en mémoire), pas le contenu — deux tableaux avec les mêmes valeurs mais séparés sont considérés différents. D'où la nécessité de comparer case par case pour une vraie égalité de contenu.
+- Technique de la double boucle avec la deuxième boucle démarrant après l'index de la première (`Ly = Lx+1`) pour comparer chaque paire d'éléments une seule fois, sans comparer un élément à lui-même.
+- Une fonction qui vérifie "une seule ligne/paire" (comme `ligneComplete`, `ligneIdentique`) est une brique séparée de la fonction qui boucle sur toute la grille (comme `unicitéLignes`) — même logique déjà présente entre `pasdeTriplet`/`equilibre` et `vérifierGrille`.
+
+### Prochaine étape (à faire la prochaine fois)
+- Reprendre et peaufiner l'affichage visuel des erreurs (la case en rouge, actuellement en commentaire dans le code).
+- Réfléchir à la génération aléatoire de grilles, maintenant que les 3 règles de validation sont complètes.
