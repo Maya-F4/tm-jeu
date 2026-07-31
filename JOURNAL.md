@@ -97,3 +97,37 @@
 ### Prochaine étape (à faire la prochaine fois)
 - Reprendre et peaufiner l'affichage visuel des erreurs (la case en rouge, actuellement en commentaire dans le code).
 - Réfléchir à la génération aléatoire de grilles, maintenant que les 3 règles de validation sont complètes.
+
+## 2026-07-31 — Plusieurs grilles + tirage aléatoire, nouveau système d'erreur, reset
+
+### Première partie : choisir une grille au hasard parmi plusieurs
+- Nouveau tableau `grillesDisponibles` : contient 3 grilles complètes (la grille d'origine + 2 nouvelles écrites par Maya), structure "tableau de grilles" (un niveau d'imbrication de plus que `grille` seule).
+- `choisirGrille()` : tire un index aléatoire avec `Math.floor(Math.random() * grillesDisponibles.length)`, puis remplace `grille.value` par une copie indépendante (`JSON.parse(JSON.stringify(...))`) de la grille choisie.
+- `copieGrilleInitiale` changée de `const` à `let` (pour pouvoir être réassignée), et mise à jour à l'intérieur de `choisirGrille()` avec une copie indépendante de la nouvelle grille — sinon `caseModifiable` continuerait à se baser sur l'ancienne grille de départ après un changement.
+- Bug corrigé en cours de route : `grille` avait été commentée par erreur en créant `grillesDisponibles`, provoquant un crash (`grille is not defined`) — remise en place.
+- Bug de syntaxe corrigé : `<bouton>` (français) n'est pas une vraie balise HTML, remplacé par `<button>`.
+- Discussion sur les limites de cette approche : ce n'est pas une vraie génération aléatoire (juste un tirage parmi un choix limité et fixe de grilles pré-écrites), la vraie génération algorithmique (par backtracking/récursion) reste un chantier à part, plus complexe, remis à plus tard.
+
+### Deuxième partie : refonte du système de case en erreur (rouge)
+- Constat de Maya en testant l'ancienne version (`dernierCoupErreur`, basée sur la dernière case jouée) : elle n'était pas persistante (s'éteignait dès qu'on jouait ailleurs) et pouvait désigner la mauvaise case (ex. le 4ème `1` d'une ligne s'allumait seul, alors que les 4 cases sont collectivement responsables du problème).
+- Grande discussion sur deux approches possibles pour la suite :
+  - **Approche A (comparaison à une solution connue)** : plus précise, mais suppose d'avoir toujours la solution complète de la grille jouée en mémoire, et soulève un vrai problème d'**unicité de solution** (surtout pour les futures grilles générées aléatoirement) — nécessiterait un second algorithme (un "vérificateur d'unicité", lui-même basé sur du backtracking) pour être fiable, chantier non négligeable.
+  - **Approche B (basée sur les règles)** : reprend `pasdeTriplet`/`equilibre` appliqués à la ligne/colonne d'une case précise, indépendamment de qui a joué en dernier. Moins précise (désigne un groupe de cases responsables, pas forcément LA case fautive), mais robuste peu importe le nombre de solutions possibles, et réutilise le travail déjà fait.
+  - Décision : partir sur l'approche B pour avoir quelque chose de solide maintenant, l'approche A restant une piste d'amélioration future si l'algorithme de génération avec garantie d'unicité est fait un jour.
+- `caseEnErreur(L, C)` : retourne `true` si la ligne `L` ou la colonne `C` de cette case casse `pasdeTriplet` ou `equilibre` (combinaison de 4 conditions avec `||`).
+- `:class="{ 'bg-red-400': caseEnErreur(L, C) }"` reliée dans le template (remplace l'ancien `dernierCoupErreur`, resté commenté avec `dernierCoup`).
+- Discussion sur le fonctionnement réel : `caseEnErreur` est appelée indépendamment 36 fois (une fois par case, via les `v-for`) ; une ligne entière s'allume parce que chaque case de cette ligne pose la même question sur la même ligne et obtient la même réponse — pas parce qu'il existe un mécanisme qui "peint" la ligne entière d'un coup.
+
+### Troisième partie : bouton de réinitialisation
+- `resetGrille()` : remet `grille.value` à une copie indépendante de `copieGrilleInitiale` (encore une fois via `JSON.parse(JSON.stringify(...))`, en évitant le piège du partage de référence).
+- Bouton "recommencer" ajouté dans le template, relié à `resetGrille()`.
+- **Résultat testé et fonctionnel** : tirage aléatoire de grille, coloration des lignes/colonnes en erreur, et réinitialisation de la grille en cours, tout fonctionne.
+
+### Notions expliquées pendant la session
+- Différence entre une variable non déclarée (erreur en mode module JS/TS) et une déclaration `const`/`let`.
+- Pourquoi appeler `JSON.parse(JSON.stringify(...))` deux fois de suite est redondant (une seule fois suffit pour une copie indépendante).
+- Le principe d'évaluation indépendante d'une expression répétée dans une boucle (`v-for`) : la même condition, évaluée plusieurs fois avec des données différentes, peut donner la même réponse sans qu'il y ait de logique centralisée.
+
+### Prochaine étape (à faire la prochaine fois)
+- Vrai algorithme de génération aléatoire de grilles complètes (backtracking/récursion), à la place du simple tirage parmi des grilles pré-écrites.
+- Si envie d'aller plus loin un jour : vérificateur d'unicité de solution, pour permettre l'approche A (comparaison à la solution) de façon fiable.

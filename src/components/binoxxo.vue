@@ -10,7 +10,39 @@ const grille = ref([
     [1, null, 0, null, null, 1],
 ])
 
-const copieGrilleInitiale = JSON.parse(JSON.stringify(grille.value))
+const grillesDisponibles = [[
+    [null, null, null, null, 1, null],
+    [null, null, 1, null, null, 1],
+    [null, null, null, 0, null, null],
+    [0, null, 0, 0, null, null],
+    [null, null, null, null, null, null],
+    [1, null, 0, null, null, 1],
+], 
+[
+    [1, null, null, 1, null, null],
+    [null, 0, null, 1, null, 1],
+    [null, null, null, null, 0, null],
+    [null, 1, null, null, null, null],
+    [null, null, null, null, null, 0],
+    [null, null, null, null, 1,null],
+],
+[
+    [0, null, 0, null, null, 0],
+    [null, null, null, 1, null, null],
+    [null, null, 0, null, null, 1],
+    [null, null, null, null, null, null],
+    [null, null, 1, 1, null, 1],
+    [null, null, null, null, null, null],
+]]
+
+let copieGrilleInitiale = JSON.parse(JSON.stringify(grille.value)) /*"quand la page s'ouvre, prends une photo de la grille de départ."*/
+
+function choisirGrille(){
+    const grilleChoisie = Math.floor(Math.random() * grillesDisponibles.length)
+    grille.value = JSON.parse(JSON.stringify(grillesDisponibles[grilleChoisie]))
+    copieGrilleInitiale = JSON.parse(JSON.stringify(grille.value))   /*"à chaque fois qu'on choisit une nouvelle grille au hasard, reprends une nouvelle photo, à jour."*/
+}
+
 
 function afficherLigne(numero: number) {
     console.log(grille.value[numero])
@@ -111,10 +143,10 @@ function jouerCase(L ,C) {
         return
     }
     grille.value[L][C] = mode.value
-    dernierCoup.value = {L ,C}
+    /*dernierCoup.value = {L ,C}*/
 }
 
-const dernierCoup = ref<null | {L: number, C: number}>(null)
+/*const dernierCoup = ref<null | {L: number, C: number}>(null)*
 
 /*function dernierCoupErreur(L ,C){
     if (dernierCoup.value === null) {
@@ -170,6 +202,16 @@ function unicitéColonnes() {
     return true
 }
 
+function caseEnErreur(L , C) {
+    if(equilibre(grille.value[L]) === false || pasdeTriplet(grille.value[L]) === false || equilibre(getColonne(C)) === false || pasdeTriplet(getColonne(C)) === false) {
+        return true
+    }
+    return false
+}
+
+function resetGrille(){
+    grille.value = JSON.parse(JSON.stringify(copieGrilleInitiale))
+}
 
 </script>
 <template>
@@ -180,6 +222,7 @@ function unicitéColonnes() {
         <template v-for="(Ligne, L) in grille" :key="L" >
             <div v-for="(Case_, C) in Ligne" :key="C" 
                 class="w-10 h-10 border border-gray-300 text-center"
+                :class="{ 'bg-red-400': caseEnErreur(L, C) }"
                 @click= "jouerCase(L , C)">
                 {{ Case_ ?? '.' }}
             </div>
@@ -198,6 +241,20 @@ function unicitéColonnes() {
     </div>
     <div>
         <p>Etat de la grille: {{ vérifierGrille() ? 'Valide' : 'Invalide' }}</p>
+    </div>
+    <div>
+        <button 
+        class="bg-green-300 hover:bg-green-400 rounded-2xl p-2 m-2"
+        @click="choisirGrille()">
+        nouvelle grille
+    </button>
+    </div>
+    <div>
+        <button
+        class="bg-yellow-300 hover:bg-yellow-400 rounded-2xl p-2 m-2"
+        @click="resetGrille()">
+        recommencer
+    </button>
     </div>
 </template> 
 
