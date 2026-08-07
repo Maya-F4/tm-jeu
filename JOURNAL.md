@@ -131,3 +131,25 @@
 ### Prochaine étape (à faire la prochaine fois)
 - Vrai algorithme de génération aléatoire de grilles complètes (backtracking/récursion), à la place du simple tirage parmi des grilles pré-écrites.
 - Si envie d'aller plus loin un jour : vérificateur d'unicité de solution, pour permettre l'approche A (comparaison à la solution) de façon fiable.
+
+## 2026-08-07 — Début de l'algorithme de génération (backtracking)
+
+### Contexte et plan
+- Début du chantier "vrai algorithme de génération aléatoire" (remplacer le simple tirage parmi 3 grilles pré-écrites par une vraie génération case par case).
+- Rappel/confirmation du concept de récursion (déjà vu en Python à l'école) : une fonction qui s'appelle elle-même, avec toujours une condition d'arrêt pour éviter une boucle infinie.
+- Plan détaillé posé pour la suite (découpage en petites étapes, explication avant écriture, Maya écrit tout le code, tests fréquents) :
+  1. Calculer la "case suivante" à partir d'une case donnée.
+  2. Cas de base (fin de grille atteinte).
+  3. Fonction récursive principale : essayer une valeur, vérifier avec `vérifierGrille()`, avancer à la case suivante si valide.
+  4. Essayer les deux valeurs (0 et 1) avant d'abandonner une case.
+  5. Vrai retour en arrière (undo + signal d'échec) si aucune valeur ne fonctionne.
+  6. Bouton pour déclencher la génération.
+  7. Tests et débogage.
+  8. (Plus tard) Cacher des cases dans la grille complète générée pour créer un vrai puzzle.
+- Bonne nouvelle réalisée pendant la session : `pasdeTriplet`, `equilibre`, `unicitéLignes`/`unicitéColonnes` géraient déjà bien les grilles partiellement remplies (les `null`) — donc `vérifierGrille()` peut être réutilisée telle quelle comme "test de cohérence" à chaque étape du remplissage, sans rien réécrire.
+
+### Ce qui a été codé dans `src/components/binoxxo.vue`
+- `caseSuivante(L, C)` : calcule les coordonnées de la case suivante en remplissant ligne par ligne (colonne suivante, ou ligne suivante si on est en bout de ligne), et retourne `null` quand on dépasse la dernière case de la grille (signal "tout est rempli", qui servira de cas de base pour la récursion).
+
+### Prochaine étape (à faire la prochaine fois)
+- Écrire `remplirGrille(L, C)`, la fonction récursive principale : essayer `0`, vérifier avec `vérifierGrille()`, avancer avec `caseSuivante` si valide (en s'arrêtant juste après le calcul de la case suivante pour cette première session de code) ; puis compléter avec l'essai du `1`, et le vrai retour en arrière (undo + `return false`) si aucune valeur ne convient.
