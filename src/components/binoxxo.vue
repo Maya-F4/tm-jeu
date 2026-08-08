@@ -213,6 +213,66 @@ function resetGrille(){
     grille.value = JSON.parse(JSON.stringify(copieGrilleInitiale))
 }
 
+
+/*création algorithme grille aléatoire*/
+
+function caseSuivante(L ,C) {
+    if (C<5){
+        return {L:L ,C:C+1}
+    }
+    if (C===5 && L<5){
+        return {L:L+1 ,C:0}
+    }
+    if (L===5 && C===5){
+        return null
+    }
+}
+
+function grilleVide() {
+    const GrilleVide =
+    [
+    [null, null, null, null, null, null],
+    [null, null, null, null, null, null],
+    [null, null, null, null, null, null],
+    [null, null, null, null, null, null],
+    [null, null, null, null, null, null],
+    [null, null, null, null, null, null],]
+    return GrilleVide
+}
+
+function remplirGrille(L ,C) {
+    const choix1ou0 = Math.random()
+    const premierEssai = choix1ou0 < 0.5 ? 0 : 1
+    const deuxiemeEssai = choix1ou0 < 0.5 ? 1 : 0
+    grille.value[L][C] = premierEssai
+    if (vérifierGrille()=== true){
+        const nextCase = caseSuivante(L ,C)
+        if (nextCase === null) {
+            return true 
+        }
+        if (remplirGrille(nextCase.L ,nextCase.C) === true) {
+            return true
+        } 
+    } 
+    grille.value[L][C] = deuxiemeEssai
+    if (vérifierGrille()=== true){
+        const nextCase = caseSuivante(L ,C)
+        if (nextCase === null) {
+            return true 
+        }
+        if (remplirGrille(nextCase.L ,nextCase.C) === true) {
+            return true
+        }
+    }
+    grille.value[L][C] = null
+    return false
+}
+
+function générerGrilleAléatoire(){
+    grille.value = grilleVide()
+    remplirGrille(0 ,0)
+}
+
 </script>
 <template>
     <div>
@@ -255,6 +315,13 @@ function resetGrille(){
         @click="resetGrille()">
         recommencer
     </button>
+    </div>
+    <div>
+        <button
+        class="bg-purple-300 hover:bg-purple-400 rounded-2xl p-2 m-2"
+        @click="générerGrilleAléatoire()">
+        générer une grille aléatoire
+        </button>
     </div>
 </template> 
 

@@ -153,3 +153,31 @@
 
 ### Prochaine étape (à faire la prochaine fois)
 - Écrire `remplirGrille(L, C)`, la fonction récursive principale : essayer `0`, vérifier avec `vérifierGrille()`, avancer avec `caseSuivante` si valide (en s'arrêtant juste après le calcul de la case suivante pour cette première session de code) ; puis compléter avec l'essai du `1`, et le vrai retour en arrière (undo + `return false`) si aucune valeur ne convient.
+
+## 2026-08-08 — Algorithme de génération terminé et fonctionnel 🎉
+
+### Ce qui a été codé dans `src/components/binoxxo.vue`
+- `remplirGrille(L, C)` terminée : fonction récursive de backtracking qui remplit la grille case par case.
+  - Tirage aléatoire de l'ordre d'essai des valeurs à chaque case (`choix1ou0 = Math.random()`, puis `premierEssai`/`deuxiemeEssai` déterminés par un ternaire) — ajouté en cours de route suite à une remarque de Maya : sans ça, l'algorithme aurait toujours essayé 0 avant 1 dans le même ordre de cases, donc produit systématiquement la même grille (pas vraiment aléatoire).
+  - Pour chaque valeur essayée : pose la valeur, vérifie avec `vérifierGrille()` (réutilisée telle quelle, elle gère déjà bien les grilles partiellement remplies), avance sur la case suivante via `caseSuivante` si valide, et propage `true` en cas de succès jusqu'au bout de la grille (`caseSuivante` renvoyant `null`).
+  - Si aucune des deux valeurs ne fonctionne : remet la case à `null` et renvoie `false` — le vrai "retour en arrière" (backtracking).
+- `grilleVide()` : fonction qui retourne une grille 6×6 neuve remplie uniquement de `null`, pour repartir de zéro avant chaque génération.
+- `générerGrilleAléatoire()` : combine les deux — réinitialise `grille.value` avec `grilleVide()`, puis lance `remplirGrille(0, 0)`.
+- Bouton "générer une grille aléatoire" ajouté dans le template.
+- **Résultat testé et fonctionnel** : clic sur le bouton → grille complète, valide, générée aléatoirement (grilles différentes à chaque clic). Premier vrai algorithme de génération du projet, plus besoin de piocher parmi des grilles pré-écrites.
+
+### Bugs corrigés en cours de route
+- `caseSuivante` (écrite la session précédente) n'avait pas été sauvegardée sur le disque — juste un oubli de `Cmd+S`, pas un vrai bug.
+- Première tentative de `remplirGrille` : essayer `0` et `1` dans des blocs `if`/sinon séparés faisait qu'une des deux valeurs n'était **jamais** testée dans la moitié des cas (bug de logique) — corrigé en généralisant avec `premierEssai`/`deuxiemeEssai`, deux blocs symétriques peu importe l'ordre tiré.
+- Condition finale `if (vérifierGrille() === false)` avant le retour en arrière : inutile et bugguée (ne se déclenchait pas dans certains cas d'échec légitimes) — simplifiée en un reset + `return false` inconditionnel, puisqu'arriver à ces lignes signifie déjà que rien n'a fonctionné.
+- `grilleVide()` : oubli du mot-clé `return` (le tableau était construit mais jamais renvoyé), puis confusion entre `return grilleVide` (qui renvoie la fonction elle-même) et `return` suivi directement du tableau.
+
+### Notions expliquées pendant la session
+- Confirmation/rappel de la récursion (déjà vue en Python à l'école) : une fonction qui s'appelle elle-même, avec une condition d'arrêt obligatoire.
+- Pourquoi `return true` doit remonter explicitement à chaque étage de la récursion pour qu'un succès en profondeur soit reconnu par tous les appels précédents (sinon ils continueraient à chercher inutilement).
+- Le mécanisme concret du retour en arrière : chaque appel de `remplirGrille` reste "en attente" pendant son appel récursif ; quand celui-ci renvoie `false`, l'exécution reprend simplement à la ligne suivante dans la même fonction (essayer l'autre valeur) — pas de mécanisme magique séparé, juste la suite normale du code après un appel qui n'a pas satisfait la condition.
+- Différence entre déclarer une constante (créée une fois) et une fonction (recrée sa valeur à chaque appel) pour éviter le piège du partage de référence, appliqué ici à `grilleVide()`.
+
+### Prochaine étape (à faire la prochaine fois)
+- Cacher certaines cases de la grille complète générée pour en faire un vrai puzzle jouable (au lieu d'une grille toujours entièrement remplie).
+- Réfléchir, si envie d'aller plus loin, à la question de l'unicité de la solution une fois des cases cachées.
