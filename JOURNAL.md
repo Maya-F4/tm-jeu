@@ -181,3 +181,44 @@
 ### Prochaine étape (à faire la prochaine fois)
 - Cacher certaines cases de la grille complète générée pour en faire un vrai puzzle jouable (au lieu d'une grille toujours entièrement remplie).
 - Réfléchir, si envie d'aller plus loin, à la question de l'unicité de la solution une fois des cases cachées.
+
+## 2026-08-09 — Cases cachées, affichage X/O, et début d'un vrai solveur logique
+
+### Cacher des cases pour créer un vrai puzzle
+- `cacherUneCase()` : tire une case au hasard (avec une boucle `while`, nouveau type de boucle appris — répète tant qu'une condition reste vraie, contrairement à `for` qui répète un nombre de fois fixé à l'avance) jusqu'à tomber sur une case pas encore cachée, puis la vide.
+  - Bug corrigé : les coordonnées de départ étaient initialisées à `(0, 0)` au lieu d'un premier tirage aléatoire, ce qui faisait que le tout premier appel cachait toujours la même case au lieu d'une case aléatoire.
+- `cacherPlusieursCases()` : répète `cacherUneCase()` un nombre de fois aléatoire (`nombreACacher`, recalculé à chaque appel — attention, une variable déclarée en dehors d'une fonction ne se "rafraîchit" pas toute seule), puis met à jour `copieGrilleInitiale` avec la nouvelle grille (cases cachées comprises), sinon `caseModifiable` resterait basée sur l'ancien état.
+- Intégré dans `générerGrilleAléatoire()` : grille vide → remplissage complet par backtracking → puis cases cachées. Premier vrai puzzle généré de bout en bout.
+
+### Affichage X/O au lieu de 0/1
+- Discussion sur deux options : changer les valeurs stockées partout (risqué, casserait toutes les fonctions de règles qui comparent à `0`/`1`) vs changer uniquement l'affichage (choisi).
+- `changer10enXO(L, C)` : retourne `'O'` pour `0`, `'X'` pour `1`, `''` pour une case vide — utilisée dans le template à la place de `{{ Case_ ?? '.' }}`.
+
+### Investigation d'un faux "Invalide"
+- Maya a résolu une grille écrite à la main (tirée d'un journal papier) correctement (vérifiée avec le corrigé), mais le jeu affichait quand même "Invalide", sans case rouge.
+- Recherche des règles officielles du Binoxxo/Takuzu : confirmé que la règle d'unicité s'applique **aussi bien aux colonnes qu'aux lignes** (`unicitéColonnes`, qui n'a pas d'équivalent visuel rouge puisque `caseEnErreur` ne vérifie que `pasdeTriplet`/`equilibre`, pas l'unicité).
+- Cause trouvée : deux colonnes de la grille papier étaient identiques — le journal source utilisait des règles simplifiées (uniquement l'unicité des lignes, pas des colonnes). Conclusion : pas de bug dans le code, juste une différence de règles entre la source papier et l'implémentation (plus complète/standard).
+
+### Grande réflexion : "résolvable" vs "solution unique" vs "résolvable par pure logique"
+- En essayant de résoudre une grille générée avec peu de cases visibles, Maya s'est retrouvée bloquée sans pouvoir déduire la suite — a soulevé une distinction importante :
+  - **Résolvable** (au moins une solution existe) : déjà garanti automatiquement, puisqu'on cache des cases à partir d'une grille déjà complète et valide.
+  - **Solution unique** (vérificateur d'unicité, évoqué avant) : garantit qu'il n'existe qu'UNE grille valide possible, mais pas que cette solution soit trouvable par un raisonnement logique simple — elle pourrait exiger de deviner puis vérifier.
+  - **Résolvable par pure déduction logique** (ce que Maya veut vraiment, comme les vrais puzzles de journaux) : à chaque étape, on doit pouvoir déduire la valeur d'au moins une case avec certitude, sans jamais avoir à deviner.
+- Recherche des techniques de résolution logique standards du Binairo/Takuzu (confirmé : *"Binairo puzzles can be solved using logic and deduction, and do not require any guessing or trial-and-error"*), quatre techniques identifiées :
+  1. Paire adjacente (`X X _` ou `_ X X`) → force la case d'à côté à la valeur opposée.
+  2. "Sandwich" (`X _ X`) → force la case du milieu à la valeur opposée.
+  3. Comptage → si une ligne/colonne a déjà 3 fois un symbole, le reste doit être l'autre symbole.
+  4. Déduction par unicité (technique avancée, mise de côté pour l'instant).
+- Nouveau plan : construire un "solveur logique" (différent du générateur par backtracking) qui applique ces techniques en boucle jusqu'à blocage ou grille complète, pour ensuite s'en servir pendant la génération : ne cacher une case que si le solveur logique arrive encore à tout déduire sans elle.
+
+### Ce qui a été codé dans `src/components/binoxxo.vue` (début du solveur logique)
+- `déduireParComptage(Ligne)` : compte les `0`/`1` d'une ligne, puis (dans une deuxième boucle séparée, après le comptage complet) remplit les cases vides restantes avec le symbole manquant si l'autre a déjà atteint 3.
+- `valeurOpposée(valeur)` : retourne l'inverse de `0`/`1`, utilisée par les fonctions suivantes.
+- `déduireSandwich(Ligne)` : détecte le motif `X _ X` et déduit la case du milieu. Bug corrigé en cours de route : sans vérifier que les voisins ne sont pas `null`, `null === null` se serait évalué à vrai par erreur.
+- `déduireAprèsPaire(Ligne)` : détecte `X X _` (paire avant la case vide). Bug de borne corrigé (la boucle commençait à `C=3` au lieu de `C=2`, ratant un cas valide).
+- `déduireAvantPaire(Ligne)` : détecte `_ X X` (paire après la case vide) — écrite en autonomie, correcte du premier coup.
+
+### Prochaine étape (à faire la prochaine fois)
+- Assembler les 4 fonctions de déduction en un vrai solveur qui les applique à **toutes** les lignes et colonnes, en boucle, jusqu'à grille complète ou blocage.
+- Utiliser ce solveur pendant `cacherPlusieursCases()` : ne cacher une case que si le solveur logique peut encore tout déduire sans elle, sinon la remettre.
+- Petit oubli remarqué (pas encore signalé à Maya) : le type de `mode` a été changé en `ref<null | 'O' | 'X'>(null)`, mais les boutons lui assignent toujours `0`/`1` (`@click="mode=0"`) — incohérence de typage à nettoyer, sans impact fonctionnel pour l'instant.

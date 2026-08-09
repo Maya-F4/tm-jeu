@@ -126,7 +126,7 @@ function equilibre(Ligne) {
     return true
 }
 
-const mode = ref<null | 0 | 1>(null)
+const mode = ref<null | 'O' | 'X'>(null)
 
 function caseModifiable(L ,C) {
     if (copieGrilleInitiale[L][C] === null) {
@@ -271,6 +271,110 @@ function remplirGrille(L ,C) {
 function générerGrilleAléatoire(){
     grille.value = grilleVide()
     remplirGrille(0 ,0)
+    cacherPlusieursCases()
+}
+
+/*création cases aléatoires à cacher*/
+
+
+function cacherUneCase(){
+    let L = Math.floor(Math.random()*6)
+    let C = Math.floor(Math.random()*6)
+    while (grille.value[L][C] === null) {
+       L = Math.floor(Math.random()*6)
+       C = Math.floor(Math.random()*6)
+       } 
+    grille.value[L][C] = null
+}
+
+function cacherPlusieursCases(){
+    const nombreACacher = Math.floor(Math.random()*5+20)
+    for(let n=0 ; n<nombreACacher ; n=n+1){
+        cacherUneCase()
+    }
+    copieGrilleInitiale = JSON.parse(JSON.stringify(grille.value))   /*"à chaque fois qu'on choisit une nouvelle grille au hasard, reprends une nouvelle photo, à jour."*/
+}
+
+/*estétique*/
+
+function changer10enXO(L,C){
+    if (grille.value[L][C] === 0) {
+        return 'O'
+    }
+    if (grille.value[L][C] === 1) {
+        return 'X'
+    }
+    else {
+        return ''
+    }
+}
+
+/*solveur logique*/
+
+function déduireParComptage(Ligne){
+    let nb0=0
+    let nb1=0
+    for(let C=0 ; C<6 ; C=C+1){
+        if(Ligne[C]===0){
+            nb0=nb0+1
+        }
+        if(Ligne[C]===1){
+            nb1=nb1+1
+        }
+    }
+    if (nb0===3){
+        for(let C=0 ; C<6 ; C=C+1){
+            if(Ligne[C]===null){
+                Ligne[C]=1
+            }
+        }
+    }
+    if (nb1===3){
+        for(let C=0 ; C<6 ; C=C+1){
+            if(Ligne[C]===null){
+                Ligne[C]=0
+            }
+        }
+    }
+}
+
+function valeurOpposée(valeur){
+    if (valeur===0){
+        return 1
+    }
+    if (valeur===1){
+        return 0
+    }
+}
+
+function déduireSandwich(Ligne){
+    for(let C=1; C<5 ; C=C+1){
+        if (Ligne[C]===null){
+            if(Ligne[C-1]===Ligne[C+1] && Ligne[C-1]!==null){
+                Ligne[C]=valeurOpposée(Ligne[C-1])
+            }
+        }
+    }
+}
+
+function déduireAprèsPaire(Ligne){
+    for(let C=2; C<6 ; C=C+1){
+        if (Ligne[C]===null){
+            if(Ligne[C-1]===Ligne[C-2] && Ligne[C-1]!==null){
+                Ligne[C]=valeurOpposée(Ligne[C-1])
+            }
+        }
+    }
+}
+
+function déduireAvantPaire(Ligne){
+    for(let C=0; C<4 ; C=C+1){
+        if (Ligne[C]===null){
+            if(Ligne[C+1]===Ligne[C+2] && Ligne[C+1]!==null){
+                Ligne[C]=valeurOpposée(Ligne[C+1])
+            }
+        }
+    }
 }
 
 </script>
@@ -284,20 +388,19 @@ function générerGrilleAléatoire(){
                 class="w-10 h-10 border border-gray-300 text-center"
                 :class="{ 'bg-red-400': caseEnErreur(L, C) }"
                 @click= "jouerCase(L , C)">
-                {{ Case_ ?? '.' }}
+                {{ changer10enXO(L,C)}}
             </div>
         </template>
     </div>
     <div>
         <button 
         class="bg-blue-400 border-blue-500 rounded-2xl text-white p-2 m-2 hover:bg-blue-500"
-        @click="mode=0">Mode 0</button>
+        :class="{ 'bg-blue-500': mode === 0 }"
+        @click="mode=0">Mode O</button>
         <button 
-        class="bg-blue-400 border-blue-500 rounded-2xl text-white p-2 m-2 hover:bg-blue-500"
-        @click="mode=1">Mode 1</button>
-    </div>
-    <div>
-        <p>Mode actuel: {{ mode ?? 'Aucun' }}</p>
+        class="bg-blue-400 border-blue-500 rounded-2xl text-white p-2 m-2 hover:bg-blue-500 "
+        :class="{ 'bg-blue-500': mode === 1 }"
+        @click="mode=1">Mode X</button>
     </div>
     <div>
         <p>Etat de la grille: {{ vérifierGrille() ? 'Valide' : 'Invalide' }}</p>
