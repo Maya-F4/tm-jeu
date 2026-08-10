@@ -10,7 +10,7 @@ const grille = ref([
     [1, null, 0, null, null, 1],
 ])
 
-const grillesDisponibles = [[
+/*const grillesDisponibles = [[
     [null, null, null, null, 1, null],
     [null, null, 1, null, null, 1],
     [null, null, null, 0, null, null],
@@ -33,16 +33,15 @@ const grillesDisponibles = [[
     [null, null, null, null, null, null],
     [null, null, 1, 1, null, 1],
     [null, null, null, null, null, null],
-]]
+]]*/
 
 let copieGrilleInitiale = JSON.parse(JSON.stringify(grille.value)) /*"quand la page s'ouvre, prends une photo de la grille de départ."*/
 
-function choisirGrille(){
+/*function choisirGrille(){
     const grilleChoisie = Math.floor(Math.random() * grillesDisponibles.length)
     grille.value = JSON.parse(JSON.stringify(grillesDisponibles[grilleChoisie]))
-    copieGrilleInitiale = JSON.parse(JSON.stringify(grille.value))   /*"à chaque fois qu'on choisit une nouvelle grille au hasard, reprends une nouvelle photo, à jour."*/
-}
-
+    copieGrilleInitiale = JSON.parse(JSON.stringify(grille.value))   "à chaque fois qu'on choisit une nouvelle grille au hasard, reprends une nouvelle photo, à jour."
+}*/
 
 function afficherLigne(numero: number) {
     console.log(grille.value[numero])
@@ -288,11 +287,22 @@ function cacherUneCase(){
 }
 
 function cacherPlusieursCases(){
-    const nombreACacher = Math.floor(Math.random()*5+20)
-    for(let n=0 ; n<nombreACacher ; n=n+1){
-        cacherUneCase()
+    let tentatives = 0
+    let casesCachées = 0
+    while (casesCachées < 20 && tentatives < 200) {
+        let L = Math.floor(Math.random()*6)
+        let C = Math.floor(Math.random()*6)
+        while (grille.value[L][C] === null) {
+            L = Math.floor(Math.random()*6)
+            C = Math.floor(Math.random()*6)
+            }
+        essayerCacherCase(L , C)
+        tentatives = tentatives + 1
+        if (grille.value[L][C] === null) {
+            casesCachées = casesCachées + 1
     }
-    copieGrilleInitiale = JSON.parse(JSON.stringify(grille.value))   /*"à chaque fois qu'on choisit une nouvelle grille au hasard, reprends une nouvelle photo, à jour."*/
+    }
+     copieGrilleInitiale = JSON.parse(JSON.stringify(grille.value))   /*"à chaque fois qu'on choisit une nouvelle grille au hasard, reprends une nouvelle photo, à jour."*/
 }
 
 /*estétique*/
@@ -377,6 +387,95 @@ function déduireAvantPaire(Ligne){
     }
 }
 
+function déduireParExclusion(Ligne){
+    if (Ligne[0]===Ligne[5] && Ligne[0]!==null && Ligne[1]!==null && Ligne[1]!==Ligne[0] && Ligne[2]===null && Ligne[3]===null && Ligne[4]===null){
+        Ligne[4]=valeurOpposée(Ligne[0])
+}
+    if (Ligne[0]===Ligne[5] && Ligne[0]!==null && Ligne[4]!==null && Ligne[4]!==Ligne[0] && Ligne[2]===null && Ligne[3]===null && Ligne[1]===null){
+    Ligne[1]=valeurOpposée(Ligne[5])
+}
+}
+
+
+function appliquerColonne(numéro , colonne){
+    for (let L=0 ; L<6 ; L=L+1){
+        grille.value[L][numéro]=colonne[L]
+    }
+}
+
+function UnePasseDeDéduction(){
+    for (let L=0 ; L<6 ; L=L+1){
+        déduireParComptage(grille.value[L])
+        déduireSandwich(grille.value[L])
+        déduireAprèsPaire(grille.value[L])
+        déduireAvantPaire(grille.value[L])
+        déduireParExclusion(grille.value[L])
+    }
+    for (let C=0 ; C<6 ; C=C+1){
+        const colonne = getColonne(C)
+        déduireParComptage(colonne)
+        déduireSandwich(colonne)
+        déduireAprèsPaire(colonne)
+        déduireAvantPaire(colonne)
+        déduireParExclusion(colonne)
+        appliquerColonne(C , colonne)
+    }
+}
+
+function compterCasesVides(){
+    let count = 0
+    for (let L=0 ; L<6 ; L=L+1){
+        for (let C=0 ; C<6 ; C=C+1){
+            if (grille.value[L][C] === null){
+                count = count + 1
+            }
+        }
+    }
+    return count
+}
+
+function solveurLogique(){
+    let casesVidesAvant=compterCasesVides()
+    while (casesVidesAvant>0){
+        UnePasseDeDéduction()
+        let nouvellesCasesVides=compterCasesVides()
+        if (nouvellesCasesVides===casesVidesAvant){
+            return false
+        }
+        casesVidesAvant=nouvellesCasesVides
+        }
+    return true
+}
+
+/*function testerSolveurLogique(){
+    générerGrilleAléatoire()
+    const grilleAvant = JSON.parse(JSON.stringify(grille.value))
+    const résultat = solveurLogique()
+    if (résultat===true){
+        console.log('la grille a été résolue par le solveur logique')
+    }
+    if (résultat===false){
+        console.log('le solveur logique n\'a pas pu résoudre la grille')
+    }
+    console.log('grille avant le solveur logique :')
+    console.log(grilleAvant)
+    console.log('grille après le solveur logique :')
+    console.log(grille.value)
+}*/
+
+function essayerCacherCase(L , C){
+    const copieIndépendanteGrille = JSON.parse(JSON.stringify(grille.value))
+    grille.value[L][C] = null
+    const résultat = solveurLogique()
+    grille.value = copieIndépendanteGrille
+    if (résultat===true){
+        grille.value[L][C] = null
+    }
+}
+
+
+
+
 </script>
 <template>
     <div>
@@ -405,13 +504,13 @@ function déduireAvantPaire(Ligne){
     <div>
         <p>Etat de la grille: {{ vérifierGrille() ? 'Valide' : 'Invalide' }}</p>
     </div>
-    <div>
-        <button 
+
+    <!-- <button 
         class="bg-green-300 hover:bg-green-400 rounded-2xl p-2 m-2"
         @click="choisirGrille()">
         nouvelle grille
-    </button>
-    </div>
+    </button> -->
+
     <div>
         <button
         class="bg-yellow-300 hover:bg-yellow-400 rounded-2xl p-2 m-2"
@@ -426,5 +525,12 @@ function déduireAvantPaire(Ligne){
         générer une grille aléatoire
         </button>
     </div>
+
+        <!-- <button
+        class="bg-pink-300 hover:bg-pink-400 rounded-2xl p-2 m-2"
+        @click="testerSolveurLogique()">
+        tester le solveur logique
+        </button> -->
+
 </template> 
 

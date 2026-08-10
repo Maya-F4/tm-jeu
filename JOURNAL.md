@@ -222,3 +222,33 @@
 - Assembler les 4 fonctions de déduction en un vrai solveur qui les applique à **toutes** les lignes et colonnes, en boucle, jusqu'à grille complète ou blocage.
 - Utiliser ce solveur pendant `cacherPlusieursCases()` : ne cacher une case que si le solveur logique peut encore tout déduire sans elle, sinon la remettre.
 - Petit oubli remarqué (pas encore signalé à Maya) : le type de `mode` a été changé en `ref<null | 'O' | 'X'>(null)`, mais les boutons lui assignent toujours `0`/`1` (`@click="mode=0"`) — incohérence de typage à nettoyer, sans impact fonctionnel pour l'instant.
+
+## 2026-08-10 — Solveur logique terminé, intégré à la génération, et nouvelle technique perso
+
+### Assemblage final du solveur logique
+- `appliquerColonne(numéro, colonne)` : l'inverse de `getColonne` — réécrit un tableau de colonne (modifié par les déductions) dans la vraie `grille.value`, colonne par colonne. Nécessaire car `getColonne` ne renvoie qu'une copie, pas un lien vers la grille.
+- `UnePasseDeDéduction()` : applique les 4 (puis 5, voir plus bas) techniques de déduction à chacune des 6 lignes, puis à chacune des 6 colonnes (récupérées avec `getColonne`, puis réécrites avec `appliquerColonne`).
+- `compterCasesVides()` : compte le nombre total de `null` dans toute la grille.
+- `solveurLogique()` : boucle sur `UnePasseDeDéduction()` jusqu'à ce que la grille soit complète (`true`) ou qu'une passe entière ne fasse plus progresser le compte de cases vides (`false`, bloqué). Plusieurs bugs de "shadowing" corrigés en cours de route (des `let` redéclarés par erreur à l'intérieur de boucles, qui créaient des variables séparées au lieu de réutiliser les bonnes) — même piège rencontré et corrigé plusieurs fois dans la session.
+- Testé avec un bouton temporaire `testerSolveurLogique()` (généré une grille, lancé le solveur, comparé avant/après dans la console) — confirmé que le solveur fait de vraies déductions (progrès visible), réussit parfois, échoue parfois selon la répartition aléatoire des cases cachées à ce stade.
+
+### Grande intégration : cacher les cases avec vérification du solveur
+- Discussion importante : Maya a fait remarquer qu'un vérificateur d'unicité classique ne suffit pas — un puzzle peut avoir une solution mathématiquement unique sans être **résolvable par déduction logique pure** (sans jamais deviner). C'est justement ce que le solveur logique permet de vérifier.
+- `essayerCacherCase(L, C)` : sauvegarde une copie de la grille actuelle, cache la case candidate, lance `solveurLogique()`, restaure la sauvegarde (annulant tout ce que le solveur a fait), et ne recache la case que si le solveur avait réussi. Astuce pour éviter de réécrire tout le solveur pour qu'il travaille sur une "copie de test" séparée.
+- `cacherPlusieursCases()` réécrite : au lieu de cacher des cases au hasard sans contrôle, elle tire une case candidate pas encore cachée, appelle `essayerCacherCase`, et compte les vraies réussites, avec une limite de tentatives (200) pour éviter une boucle infinie si plus aucune case n'est cachable.
+- **Résultat testé et confirmé** : Maya a généré un puzzle et l'a résolu elle-même à la main, avec ses propres déductions, sans jamais deviner — la preuve que l'objectif initial (des puzzles "comme dans les vrais journaux") est atteint.
+
+### Nettoyage
+- Ancien système à 3 grilles pré-écrites (`grillesDisponibles`, `choisirGrille`, bouton "nouvelle grille") mis en commentaire — plus utile maintenant que la vraie génération existe, mais gardé en trace du cheminement pour le TM.
+- `testerSolveurLogique()` et son bouton mis en commentaire aussi (il ne testait de toute façon pas la grille affichée, mais en créait une nouvelle à chaque clic — devenu trompeur et redondant maintenant que la vérification est intégrée directement dans `cacherPlusieursCases`).
+- Bug récurrent rencontré deux fois dans le projet : mettre `grille` en commentaire par erreur en même temps qu'un autre bloc — corrigé à chaque fois.
+
+### Nouvelle technique de déduction perso : `déduireParExclusion`
+- Maya a proposé sa propre technique de résolution (utilisée quand elle joue elle-même) : si une valeur n'a plus qu'une seule occurrence à placer dans une ligne, et qu'un bloc de 3 cases vides est encerclé par cette valeur des deux côtés (ex. `X O _ _ _ X`), alors la case juste après l'un des bords ne peut pas recevoir cette dernière valeur — sinon les cases restantes formeraient un triplet de l'autre symbole. Bien comprise et confirmée avec un exemple tracé à la main avant de coder.
+- Implémentée pour les deux orientations possibles du motif (bloc collé à `Ligne[0]`/`Ligne[5]` d'un côté ou de l'autre), et intégrée dans `UnePasseDeDéduction()` pour les lignes et les colonnes.
+- Remarque notée : cette version ne reconnaît que le cas précis où le bloc de 3 cases vides est au centre exact de la ligne (positions 2, 3, 4) — pas une position décalée. Piste de généralisation possible plus tard si besoin.
+
+### Prochaine étape (à faire la prochaine fois)
+- Éventuellement généraliser `déduireParExclusion` à d'autres positions du bloc de cases vides dans la ligne.
+- Depuis la liste de idées plus large évoquée : message "Bravo, gagné !", vrai bouton "résoudre" (sur la grille en cours, pas en générer une nouvelle), bouton "indice", chronomètre, 4ème technique de déduction avancée (unicité), et les gros chantiers (tailles 4×4/8×8, son, page d'accueil) toujours en attente.
+- Nettoyage mineur en attente : incohérence de typage sur `mode` (`'O'|'X'` déclaré, `0`/`1` assignés).
