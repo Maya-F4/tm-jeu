@@ -289,7 +289,7 @@ function cacherUneCase(){
 function cacherPlusieursCases(){
     let tentatives = 0
     let casesCachées = 0
-    while (casesCachées < 20 && tentatives < 200) {
+    while (casesCachées < 26 && tentatives < 200) {
         let L = Math.floor(Math.random()*6)
         let C = Math.floor(Math.random()*6)
         while (grille.value[L][C] === null) {
@@ -387,12 +387,87 @@ function déduireAvantPaire(Ligne){
     }
 }
 
+function ligneCompatible(LigneComplète , LigneIncomplète){
+    for (let C=0 ; C<6 ; C=C+1){
+        if (LigneIncomplète[C]!==null && LigneComplète[C]!==LigneIncomplète[C]){
+            return false
+        }
+    }
+    return true 
+}  
+
+function déduireComparaison(){
+    for (let L=0 ; L<6 ; L=L+1){
+        let nbnull=0
+        for (let C=0 ; C<6 ; C=C+1){
+            if(grille.value[L][C]===null){
+                nbnull=nbnull+1
+            }
+        }
+        if (nbnull===2){
+            for (let L2=0 ; L2<6 ; L2=L2+1){
+            if (ligneComplete(grille.value[L2])===true){
+                if (ligneCompatible(grille.value[L2] , grille.value[L])===true){
+                    for (let C=0 ; C<6 ; C=C+1){
+                        if(grille.value[L][C]===null){
+                            grille.value[L][C]=valeurOpposée(grille.value[L2][C])
+                        }
+                    }
+                }
+            }
+            }
+        }
+    }
+}
+
+function déduireComparaisonColonnes(){
+    for (let Co=0 ; Co<6 ; Co=Co+1){
+        const colonne=getColonne(Co)
+        let nbnull=0
+        for (let C=0 ; C<6 ; C=C+1){
+            if(colonne[C]===null){
+                nbnull=nbnull+1
+            }
+        }
+        if (nbnull===2){
+            for (let Co2=0 ; Co2<6 ; Co2=Co2+1){
+                const colonne2=getColonne(Co2)
+            if (ligneComplete(colonne2)===true){
+                if (ligneCompatible(colonne2 , colonne)===true){
+                    for (let C=0 ; C<6 ; C=C+1){
+                        if(colonne[C]===null){
+                            colonne[C]=valeurOpposée(colonne2[C])
+                        }
+                    }
+                }
+            }
+            }
+            appliquerColonne(Co , colonne)
+        }
+    }
+}
+
+
+
+
+
+
 function déduireParExclusion(Ligne){
     if (Ligne[0]===Ligne[5] && Ligne[0]!==null && Ligne[1]!==null && Ligne[1]!==Ligne[0] && Ligne[2]===null && Ligne[3]===null && Ligne[4]===null){
         Ligne[4]=valeurOpposée(Ligne[0])
 }
     if (Ligne[0]===Ligne[5] && Ligne[0]!==null && Ligne[4]!==null && Ligne[4]!==Ligne[0] && Ligne[2]===null && Ligne[3]===null && Ligne[1]===null){
     Ligne[1]=valeurOpposée(Ligne[5])
+}
+    if (Ligne[0]===Ligne[1] && Ligne[0]!==null && Ligne[2]!==null && Ligne[2]!==Ligne[0] && Ligne[3]===null && Ligne[5]===null && Ligne[4]===null){
+    Ligne[5]=valeurOpposée(Ligne[0])
+}
+    if (Ligne[5]===Ligne[4] && Ligne[5]!==null && Ligne[3]!==null && Ligne[3]!==Ligne[5] && Ligne[0]===null && Ligne[1]===null && Ligne[2]===null){
+    Ligne[0]=valeurOpposée(Ligne[5])
+}
+    if (Ligne[0]===Ligne[5] && Ligne[0]!==null && Ligne[1]===null && Ligne[2]===null && Ligne[3]===null && Ligne[4]===null){
+    Ligne[1]=valeurOpposée(Ligne[0])
+    Ligne[4]=valeurOpposée(Ligne[0])
 }
 }
 
@@ -420,6 +495,8 @@ function UnePasseDeDéduction(){
         déduireParExclusion(colonne)
         appliquerColonne(C , colonne)
     }
+    déduireComparaison()
+    déduireComparaisonColonnes()
 }
 
 function compterCasesVides(){
@@ -473,10 +550,19 @@ function essayerCacherCase(L , C){
     }
 }
 
+/* autres */
 
-
+function partieGagnee(){
+if (compterCasesVides()===0 && vérifierGrille()===true){
+    return true
+}
+else {
+    return false
+}
+}
 
 </script>
+
 <template>
     <div>
         <h1 class="text-2xl font-bold mb-4">Binoxxo</h1>
@@ -532,5 +618,15 @@ function essayerCacherCase(L , C){
         tester le solveur logique
         </button> -->
 
+    <div>
+        <p v-if="partieGagnee()">Félicitations ! Vous avez gagné !</p>
+    </div>
+    <div>
+        <button
+        class="bg-red-300 hover:bg-red-400 rounded-2xl p-2 m-2"
+        @click="solveurLogique()">
+        résoudre la grille
+        </button>
+    </div>
 </template> 
 

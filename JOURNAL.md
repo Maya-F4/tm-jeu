@@ -252,3 +252,30 @@
 - Éventuellement généraliser `déduireParExclusion` à d'autres positions du bloc de cases vides dans la ligne.
 - Depuis la liste de idées plus large évoquée : message "Bravo, gagné !", vrai bouton "résoudre" (sur la grille en cours, pas en générer une nouvelle), bouton "indice", chronomètre, 4ème technique de déduction avancée (unicité), et les gros chantiers (tailles 4×4/8×8, son, page d'accueil) toujours en attente.
 - Nettoyage mineur en attente : incohérence de typage sur `mode` (`'O'|'X'` déclaré, `0`/`1` assignés).
+
+## 2026-08-11 — Généralisation de la déduction par exclusion, technique d'unicité, victoire et bouton résoudre
+
+### Généralisation de `déduireParExclusion`
+- Discussion sur les positions possibles d'un bloc de 3 cases vides dans une ligne de 6 (4 positions de départ possibles). Maya a confirmé, à partir de sa propre expérience de joueuse, que seuls 3 cas sur 4 sont réellement utiles à coder (le "milieu décalé" ne se présente pas ou est déjà couvert autrement) — décision prise en lui faisant confiance sur ce point.
+- Deux nouveaux blocs `if` ajoutés à `déduireParExclusion` : le bloc de 3 cases collé au **début** de la ligne (ex. `___OXX`) et celui collé à la **fin** (ex. `XXO___`), en miroir des deux premiers déjà écrits.
+- Un 5ème cas ajouté par Maya elle-même, plus subtil : un bloc de **4** cases vides entourées par la même valeur des deux côtés (ex. `X____X`) — dans ce cas, les deux cases aux extrémités du bloc sont déductibles (empêchent un triplet des deux côtés), mais les deux du milieu restent indéterminées. Vérifié et confirmé correct.
+- Bug récurrent rencontré et corrigé : accolade de fermeture de fonction oubliée après l'ajout d'un nouveau `if`, cassant la compilation de tout le fichier (même piège que plusieurs fois précédemment).
+
+### Nouvelle technique de déduction : l'unicité (celle mise de côté au tout début du chantier du solveur)
+- Maya a formulé elle-même le principe avec sa propre façon de jouer : si une ligne n'a plus que 2 cases vides, et qu'une autre ligne complète lui est identique sur toutes les cases déjà remplies, alors les 2 cases manquantes doivent être l'**inverse** de cette ligne complète (sinon les deux lignes seraient identiques, ce qui casse la règle d'unicité).
+- `ligneCompatible(LigneComplète, LigneIncomplète)` : nouvelle brique qui compare une ligne complète à une ligne incomplète, en ignorant les cases vides de l'incomplète.
+- `déduireComparaison()` : contrairement aux techniques précédentes, ne prend pas de `Ligne` en paramètre — elle boucle elle-même sur toute la grille (comme `unicitéLignes()`), cherche les lignes à 2 cases vides, les compare à toutes les lignes complètes, et déduit si une correspondance est trouvée.
+- `déduireComparaisonColonnes()` : même principe pour les colonnes, avec `getColonne`/`appliquerColonne`.
+- Plusieurs bugs corrigés en construisant ces deux fonctions : boucle `L2`/`Co2` oubliée après une réécriture, ordre des paramètres de `ligneCompatible` inversé (cassait silencieusement la comparaison), variable oubliée avant modification de `getColonne` (même piège que la première fois qu'`appliquerColonne` avait été créée).
+- Intégrées dans `UnePasseDeDéduction()` : appelées une seule fois chacune (pas dans les boucles ligne/colonne, puisqu'elles gèrent déjà toute la grille elles-mêmes).
+- Le solveur logique a maintenant **6 techniques de déduction** au total, dont 2 identifiées et formulées par Maya elle-même à partir de sa pratique du jeu.
+
+### Message de victoire et bouton "résoudre"
+- `partieGagnee()` : combine `compterCasesVides() === 0` et `vérifierGrille() === true`.
+- `<p v-if="partieGagnee()">Félicitations ! Vous avez gagné !</p>` — première utilisation de `v-if` (affiche l'élément seulement si la condition est vraie, contrairement à `{{ }}` qui affiche toujours quelque chose). Bug initial corrigé : `v-if="partieGagnee"` sans parenthèses (référence à la fonction elle-même, toujours "vraie") au lieu de `v-if="partieGagnee()"` (appel réel de la fonction).
+- Bouton "résoudre la grille" relié directement à `solveurLogique()` — complète la grille **actuellement affichée** en utilisant les 6 techniques de déduction, sans en générer une nouvelle.
+
+### Prochaine étape (à faire la prochaine fois)
+- Bouton "indice" (révèle une seule case) et chronomètre, toujours dans la liste des idées moyennes.
+- Nettoyage mineur en attente : incohérence de typage sur `mode`.
+- Gros chantiers toujours en attente : grilles 4×4/8×8, son, page d'accueil.
