@@ -2,12 +2,12 @@
 import { ref } from 'vue';
 
 const grille = ref([
-    [null, null, null, null, 1, null],
-    [null, null, 1, null, null, 1],
-    [null, null, null, 0, null, null],
-    [0, null, 0, 0, null, null],
+    [0, null, null, null, null, null],
+    [null, 0, null, null, 1, 1],
     [null, null, null, null, null, null],
-    [1, null, 0, null, null, 1],
+    [null, null, 1, 1, null, null],
+    [null, null, null, null, 1, null],
+    [null, 0, null, null, 0, 0],
 ])
 
 /*const grillesDisponibles = [[
@@ -125,7 +125,7 @@ function equilibre(Ligne) {
     return true
 }
 
-const mode = ref<null | 'O' | 'X'>(null)
+const mode = ref<null | 'O' | 'X' | "effacer" >(null)
 
 function caseModifiable(L ,C) {
     if (copieGrilleInitiale[L][C] === null) {
@@ -138,10 +138,15 @@ function jouerCase(L ,C) {
     if (caseModifiable(L ,C) === false) {
         return
     }
+    if (mode.value === "effacer") {
+        grille.value[L][C] = null
+        return
+    }
     if (mode.value === null) {
         return
     }
     grille.value[L][C] = mode.value
+    résoluParOrdinateur.value = false
     /*dernierCoup.value = {L ,C}*/
 }
 
@@ -210,6 +215,7 @@ function caseEnErreur(L , C) {
 
 function resetGrille(){
     grille.value = JSON.parse(JSON.stringify(copieGrilleInitiale))
+    résoluParOrdinateur.value = false
 }
 
 
@@ -271,6 +277,7 @@ function générerGrilleAléatoire(){
     grille.value = grilleVide()
     remplirGrille(0 ,0)
     cacherPlusieursCases()
+    résoluParOrdinateur.value = false
 }
 
 /*création cases aléatoires à cacher*/
@@ -561,72 +568,95 @@ else {
 }
 }
 
+let résoluParOrdinateur = ref(false)
+
+function résoudreClic(){
+    solveurLogique()
+    résoluParOrdinateur.value = true
+}
+
 </script>
 
 <template>
+    <div class="bg-rose-50 flex items-center justify-center min-h-screen">
+    <div class="flex flex-col items-center justify-center py-8 gap-y-8 ">
+    <div class="bg-white w-fit rounded-3xl shadow-md p-4 flex flex-col items-center justify-center">
     <div>
         <h1 class="text-2xl font-bold mb-4">Binoxxo</h1>
     </div>
     <div class="grid grid-cols-6 gap-1 w-fit">
         <template v-for="(Ligne, L) in grille" :key="L" >
             <div v-for="(Case_, C) in Ligne" :key="C" 
-                class="w-10 h-10 border border-gray-300 text-center"
-                :class="{ 'bg-red-400': caseEnErreur(L, C) }"
+                class="w-10 h-10 border border-gray-300 text-center rounded-lg"
+                :class="{ 'bg-red-400': caseEnErreur(L, C), 'bg-amber-200': Ligne[C] === 0 && caseModifiable(L,C)===false, 'bg-teal-200': Ligne[C] === 1 && caseModifiable(L,C)===false,'bg-gray-100': caseModifiable(L,C)===true  }"
                 @click= "jouerCase(L , C)">
                 {{ changer10enXO(L,C)}}
             </div>
         </template>
     </div>
     <div>
-        <button 
-        class="bg-blue-400 border-blue-500 rounded-2xl text-white p-2 m-2 hover:bg-blue-500"
-        :class="{ 'bg-blue-500': mode === 0 }"
-        @click="mode=0">Mode O</button>
-        <button 
-        class="bg-blue-400 border-blue-500 rounded-2xl text-white p-2 m-2 hover:bg-blue-500 "
-        :class="{ 'bg-blue-500': mode === 1 }"
-        @click="mode=1">Mode X</button>
+        <p class="px-3 py-1 rounded-full text-sm mt-2"
+        :class="{ 'bg-green-200 text-green-800': vérifierGrille() === true, 'bg-red-200 text-red-800': vérifierGrille() === false }"
+        >
+        Grille: {{ vérifierGrille() ? 'Valide' : 'Invalide' }}</p>
     </div>
     <div>
-        <p>Etat de la grille: {{ vérifierGrille() ? 'Valide' : 'Invalide' }}</p>
+        <button 
+        class="bg-rose-200 border-1 border-pink-300 rounded-2xl text-white p-2 mx-2 hover:bg-rose-300 "
+        :class="{ 'bg-rose-300': mode === 0 }"
+        @click="mode=0">Mode O</button>
+        <button 
+        class="bg-rose-200 border-1 border-pink-300 rounded-2xl text-white p-2 mx-2 hover:bg-rose-300 "
+        :class="{ 'bg-rose-300': mode === 1 }"
+        @click="mode=1">Mode X</button>
+        <button 
+        class="bg-rose-200 border-1 border-pink-300 rounded-2xl text-white p-2 mx-2 hover:bg-rose-300 "
+        :class="{ 'bg-rose-300': mode === 'effacer'}"
+        @click="mode='effacer'">Effacer</button>
     </div>
+    
+
 
     <!-- <button 
-        class="bg-green-300 hover:bg-green-400 rounded-2xl p-2 m-2"
+        class="bg-green-300 hover:bg-green-400 rounded-2xl p-2 mx-2"
         @click="choisirGrille()">
         nouvelle grille
     </button> -->
 
     <div>
         <button
-        class="bg-yellow-300 hover:bg-yellow-400 rounded-2xl p-2 m-2"
+        class="bg-yellow-200 hover:bg-yellow-300 border-1 border-yellow-300 rounded-2xl p-2 mx-2"
         @click="resetGrille()">
         recommencer
-    </button>
-    </div>
-    <div>
+        </button>
+
         <button
-        class="bg-purple-300 hover:bg-purple-400 rounded-2xl p-2 m-2"
+        class="bg-purple-200 hover:bg-purple-300 border-1 border-purple-300 rounded-2xl p-2 mx-2"
         @click="générerGrilleAléatoire()">
-        générer une grille aléatoire
+        grille aléatoire
+        </button>
+
+        <button
+        class="bg-red-200 hover:bg-red-300 border-1 border-red-300 rounded-2xl p-2 mx-2"
+        @click="résoudreClic()">
+        résoudre
         </button>
     </div>
 
         <!-- <button
-        class="bg-pink-300 hover:bg-pink-400 rounded-2xl p-2 m-2"
+        class="bg-pink-300 hover:bg-pink-400 rounded-2xl p-2 mx-2"
         @click="testerSolveurLogique()">
         tester le solveur logique
         </button> -->
 
     <div>
-        <p v-if="partieGagnee()">Félicitations ! Vous avez gagné !</p>
+        <p v-if="partieGagnee() && résoluParOrdinateur === false" class="text-green-700 text-bold text-xl border-2 border-green-300 bg-green-200 rounded-2xl p-4">Félicitations ! Vous avez gagné ! 🎉</p>
     </div>
     <div>
-        <button
-        class="bg-red-300 hover:bg-red-400 rounded-2xl p-2 m-2"
-        @click="solveurLogique()">
-        résoudre la grille
-        </button>
+        <p v-if="résoluParOrdinateur === true" class="text-blue-700 text-bold text-xl border-2 border-blue-300 bg-blue-200 rounded-2xl p-4">La grille a été résolue par l'ordinateur !</p>
+    </div>
+    </div>
+    </div>
     </div>
 </template> 
 

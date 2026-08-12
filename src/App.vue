@@ -6,7 +6,7 @@ import Binoxxo from './components/binoxxo.vue';
 <template>
   
 
-  <binoxxo />
+<binoxxo />
 
 </template>
 

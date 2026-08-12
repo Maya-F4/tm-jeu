@@ -279,3 +279,40 @@
 - Bouton "indice" (révèle une seule case) et chronomètre, toujours dans la liste des idées moyennes.
 - Nettoyage mineur en attente : incohérence de typage sur `mode`.
 - Gros chantiers toujours en attente : grilles 4×4/8×8, son, page d'accueil.
+
+## 2026-08-12 — Mise en page et direction artistique
+
+### Choix de conception
+- Comparaison visuelle de 4 ambiances possibles (épuré, ludique, carnet papier, sombre néon) — **ludique** choisi : couleurs pastel douces, formes arrondies.
+- Comparaison de deux mises en page (deux colonnes grille+panneau vs tout centré avec boutons groupés en rangées) — **tout centré, boutons groupés** choisi, en pensant aussi aux futurs ajouts (niveau, son, chrono).
+
+### Mise en place de la DA
+- Cases de la grille : couleur douce selon la valeur pour les cases **données** uniquement (`bg-amber-200` pour `O`, `bg-teal-200` pour `X`, seulement si `caseModifiable(L,C) === false`), et une couleur neutre grise (`bg-gray-100`) pour les cases **jouables** (données ou non), pour bien distinguer les indices de départ de ce que la joueuse remplit elle-même.
+- Boutons harmonisés dans une palette rose/pastel cohérente, en forme de pilule.
+- Noms de boutons raccourcis ("Mode O"/"Mode X" restent complets par choix, "générer une grille aléatoire" → "grille aléatoire", "résoudre la grille" → "résoudre").
+- Boutons d'action regroupés dans une même `<div>` (côte à côte) au lieu d'un par ligne.
+- Une carte blanche arrondie (`bg-white rounded-3xl shadow-md`) enveloppe tout le contenu, elle-même posée sur un fond de page coloré (`bg-rose-50`) qui occupe tout l'écran.
+- Badge "Grille: Valide/Invalide" (pastille arrondie, verte ou rouge selon la validité) à la place du texte brut.
+- Message de victoire stylé (encadré vert, texte en gras et en couleur, plus festif).
+
+### Bugs de mise en page rencontrés et corrigés (bonne session d'apprentissage CSS/Vue)
+- **`grille.value[L][C]` utilisé directement dans le `<template>`** : rappel important que Vue "déballe" automatiquement les `ref` dans le template — `grille` seule y équivaut déjà à `grille.value` du `<script>`. Écrire `.value` en plus dans le template casse tout. Corrigé en utilisant directement `Ligne[C]` (déjà disponible via le `v-for`).
+- **`items-center`/`justify-center` sans `flex`** : ces classes ne font rien sans `display: flex` sur le même élément — piège rencontré deux fois (conteneur de page, puis carte interne) avant que le centrage fonctionne partout.
+- **`min-h-screen` manquant** : sans elle, le fond coloré ne couvrait pas toute la hauteur de l'écran.
+- **`</div>` en trop / mal placée** : une fermeture prématurée de la carte blanche coupait le reste du contenu (boutons, message de victoire) hors de la carte — corrigée en repérant, avec l'aide du clic sur les balises dans VS Code, quelle accolade fermait quoi.
+- **Conflit de guillemets** : `mode === "effacer"` à l'intérieur d'un attribut `:class="..."` déjà délimité par des guillemets doubles cassait le HTML — corrigé avec des guillemets simples à l'intérieur.
+- **`effacer` sans guillemets du tout** (traité comme une variable inexistante au lieu du texte `'effacer'`) — corrigé.
+- **Marges qui s'additionnent** : deux groupes de boutons avec `m-2` chacun créaient un espace double entre eux (16px) par rapport aux autres écarts (8px) — piste de correction en cours : passer à un `gap` sur le conteneur flex plutôt que des marges individuelles sur chaque bouton, encore à finaliser (dernier réglage d'espacement pas encore satisfaisant).
+
+### Nouvelle fonctionnalité : mode "Effacer"
+- Troisième valeur possible pour `mode` (`'effacer'`, en plus de `'O'`/`'X'`), avec un bouton dédié.
+- `jouerCase` : si `mode.value === 'effacer'`, remet la case à `null` au lieu d'y mettre `mode.value` — permet d'annuler un coup précis sans réinitialiser toute la grille.
+
+### Distinguer une victoire du joueur d'une résolution automatique
+- Constat de Maya : cliquer sur "résoudre" affichait quand même "Félicitations, vous avez gagné !", alors que c'est le solveur qui a joué, pas elle.
+- `résoluParOrdinateur` (nouvelle variable réactive) : mise à `true` uniquement par `résoudreClic()` (la nouvelle fonction reliée au bouton "résoudre", qui appelle `solveurLogique()` puis pose ce indicateur), et remise à `false` dans `jouerCase` (dès qu'un coup est joué), `resetGrille`, et `générerGrilleAléatoire`.
+- Deux messages désormais distincts dans le template : "Félicitations !" seulement si `partieGagnee() && !résoluParOrdinateur`, et "La grille a été résolue par l'ordinateur !" si `résoluParOrdinateur`.
+
+### Prochaine étape (à faire la prochaine fois)
+- Finaliser l'espacement entre les groupes de boutons (passer proprement à un `gap` sur le conteneur plutôt que des marges individuelles, dernier réglage pas encore terminé).
+- Reprendre ensuite la liste plus large : bouton "indice", chronomètre, nettoyage du typage de `mode`, et les gros chantiers (tailles 4×4/8×8, son, page d'accueil).
