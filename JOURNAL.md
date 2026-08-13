@@ -316,3 +316,42 @@
 ### Prochaine étape (à faire la prochaine fois)
 - Finaliser l'espacement entre les groupes de boutons (passer proprement à un `gap` sur le conteneur plutôt que des marges individuelles, dernier réglage pas encore terminé).
 - Reprendre ensuite la liste plus large : bouton "indice", chronomètre, nettoyage du typage de `mode`, et les gros chantiers (tailles 4×4/8×8, son, page d'accueil).
+
+## 2026-08-13 — Bugs d'affichage, règles, son, indice et chronomètre
+
+### Finalisation de l'espacement
+- `gap-y-8` déplacé sur le bon élément (la carte blanche elle-même, celle qui a plusieurs enfants directs), au lieu du conteneur du milieu qui n'en avait qu'un seul — corrige le souci d'espacement laissé en suspens hier.
+
+### Bug de superposition des couleurs de case en erreur
+- Constat de Maya : quand une règle est cassée, toutes les cases de la ligne devraient devenir rouges, mais les `X` donnés de base restaient bleus (teal) alors que les `O` donnés devenaient bien rouges.
+- Cause : dans Vue, plusieurs classes `:class` peuvent être vraies en même temps ; celle qui l'emporte visuellement dépend de l'ordre de génération de Tailwind (pas de l'ordre écrit dans le code), ce qui expliquait l'incohérence entre X et O.
+- Corrigé en rendant les conditions de couleur mutuellement exclusives (`&& caseEnErreur(L,C)===false` ajouté aux trois autres conditions de couleur), pour que le rouge d'erreur soit toujours seul à s'appliquer quand il est vrai.
+
+### Affichage des règles du jeu
+- Décision (après réflexion, en évitant d'ajouter "un bouton partout") : un bouton "Règles" qui affiche/cache un texte, plutôt qu'un texte permanent.
+- `afficherRègles` (ref booléen), bouton qui l'inverse au clic (`afficherRègles = !afficherRègles` — nouvelle notion, l'opérateur `!` qui donne le contraire d'un booléen), et un `<p v-if="afficherRègles">` avec le texte des 3 règles.
+
+### Ajout du son
+- Deux fichiers trouvés sur freesound.org (clic + victoire), copiés dans `public/sons/`.
+- `new Audio('/sons/...')` pour créer les objets son, `.play()` pour les jouer.
+- Bug du double-clic rapide : `.play()` ne relance pas un son déjà en cours — corrigé avec `sonClic.currentTime = 0` juste avant `.play()`, pour forcer un redémarrage du début.
+- Bug du son de victoire qui se rejouait à chaque clic (même "Règles") après avoir gagné : causé par `sonWin.play()` placé à l'intérieur de `partieGagnee()`, une fonction rappelée par Vue à chaque rafraîchissement du template, pas seulement au moment du vrai gain. Corrigé en déplaçant l'appel dans `jouerCase`, juste après qu'un coup soit joué, avec vérification de `partieGagnee()` à cet instant précis — bon rappel sur la différence entre fonction "pure" (juste répondre à une question) et effet de bord (jouer un son, écrit une seule fois au bon moment).
+
+### Nettoyage : type de `mode`
+- `mode` était déclaré `ref<null | 'O' | 'X' | 'effacer'>`, mais les boutons assignaient en réalité des nombres (`0`/`1`), pas les textes `'O'`/`'X'`. Ça fonctionnait quand même car TypeScript ne vérifie les types qu'au moment du développement (pas à l'exécution dans le navigateur), et parce que `0`/`1` sont en fait cohérents avec le reste de la grille. Corrigé pour que le type dise la vérité : `ref<null | 0 | 1 | 'effacer'>`.
+
+### Bouton "Indice"
+- Réutilise le même principe que `essayerCacherCase` : sauvegarder la grille, lancer `solveurLogique()`, comparer avant/après pour repérer les cases nouvellement déduites, restaurer la grille, puis ne réappliquer qu'**une seule** case.
+- Amélioration en cours de route : au lieu de ne garder que la dernière case trouvée (ce qui donnait un indice toujours prévisible, en bas à droite en premier), toutes les cases candidates sont collectées dans un tableau (`candidats.push({L, C})`), puis une est tirée au hasard avec `Math.floor(Math.random() * candidats.length)` — pour un vrai indice aléatoire.
+
+### Chronomètre
+- `secondesEcoulées` (ref), `idChrono` (identifiant du minuteur, pas réactif).
+- `démarrerChrono()` : remet le compteur à 0 et lance `setInterval(...)` (nouvelle notion : une fonction qui répète une action toutes les X millisecondes), en gardant l'identifiant retourné.
+- `arreterChrono()` : `clearInterval(idChrono)` pour stopper proprement.
+- Démarré dans `générerGrilleAléatoire`/`resetGrille`, arrêté dans `jouerCase` en même temps que le son de victoire.
+- `tempsFormaté()` : convertit les secondes en minutes:secondes (`Math.floor(.../60)` pour les minutes, `% 60` — nouvel opérateur, le reste d'une division — pour les secondes restantes).
+- Limite identifiée et volontairement non corrigée : le chrono ne démarre pas sur la toute première grille au chargement de la page (seulement via les boutons "grille aléatoire"/"recommencer"). Décision de Maya : laisser tel quel, ce sera naturellement réglé par la future page d'accueil (avec un bouton "commencer" qui déclenchera le chrono).
+
+### Prochaine étape (à faire la prochaine fois)
+- Les gros chantiers restent : grilles 4×4/8×8, page d'accueil (qui réglera aussi le petit souci du chrono au premier chargement).
+- Continuer à ajouter des techniques de déduction personnelles si Maya en trouve en jouant.

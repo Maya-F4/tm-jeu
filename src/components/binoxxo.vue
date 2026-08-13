@@ -125,7 +125,7 @@ function equilibre(Ligne) {
     return true
 }
 
-const mode = ref<null | 'O' | 'X' | "effacer" >(null)
+const mode = ref<null | 0 | 1 | "effacer" >(null)
 
 function caseModifiable(L ,C) {
     if (copieGrilleInitiale[L][C] === null) {
@@ -146,8 +146,15 @@ function jouerCase(L ,C) {
         return
     }
     grille.value[L][C] = mode.value
+    sonClic.currentTime = 0
+    sonClic.play()
     résoluParOrdinateur.value = false
     /*dernierCoup.value = {L ,C}*/
+    if (partieGagnee()===true){
+        sonWin.currentTime =0
+        sonWin.play()
+        arreterChrono()
+    }
 }
 
 /*const dernierCoup = ref<null | {L: number, C: number}>(null)*
@@ -216,6 +223,7 @@ function caseEnErreur(L , C) {
 function resetGrille(){
     grille.value = JSON.parse(JSON.stringify(copieGrilleInitiale))
     résoluParOrdinateur.value = false
+    démarrerChrono()
 }
 
 
@@ -278,6 +286,7 @@ function générerGrilleAléatoire(){
     remplirGrille(0 ,0)
     cacherPlusieursCases()
     résoluParOrdinateur.value = false
+    démarrerChrono()
 }
 
 /*création cases aléatoires à cacher*/
@@ -575,12 +584,65 @@ function résoudreClic(){
     résoluParOrdinateur.value = true
 }
 
+let afficherRègles= ref(false)
+
+const sonClic = new Audio ("/sons/clic.wav")
+
+const sonWin = new Audio ("/sons/victoire.wav")
+
+function indice(){
+    const sauvegarde = JSON.parse(JSON.stringify(grille.value))
+    solveurLogique()
+    const candidats = []
+    for (let L=0 ; L<6 ; L=L+1){
+        for (let C=0 ; C<6 ; C=C+1){
+            if (sauvegarde[L][C]===null && grille.value[L][C]!==null) {
+                candidats.push({L, C})
+            }
+        }
+    }
+    const choixAléatoireCandidat = Math.floor(Math.random() * candidats.length)
+    const caseChoisie =candidats[choixAléatoireCandidat]
+    const valeurTrouvée = grille.value[caseChoisie.L][caseChoisie.C]
+    grille.value = sauvegarde
+    grille.value[caseChoisie.L][caseChoisie.C] = valeurTrouvée
+}
+
+const secondesEcoulées = ref(0)
+
+let idChrono = null 
+
+function démarrerChrono (){
+    secondesEcoulées.value = 0
+    idChrono = setInterval(()=>{secondesEcoulées.value = secondesEcoulées.value+1},1000)
+}
+
+function arreterChrono(){
+    clearInterval(idChrono)
+}
+
+function tempsFormaté () {
+    let minute= Math.floor(secondesEcoulées.value / 60)
+    let seconde= secondesEcoulées.value % 60
+    let temps= minute + " : " + seconde 
+    return temps
+}
+
 </script>
 
 <template>
     <div class="bg-rose-50 flex items-center justify-center min-h-screen">
-    <div class="flex flex-col items-center justify-center py-8 gap-y-8 ">
-    <div class="bg-white w-fit rounded-3xl shadow-md p-4 flex flex-col items-center justify-center">
+    <div class="flex flex-col items-center justify-center py-8  ">
+        <button @click="afficherRègles= !afficherRègles"
+        class="text-xs text-gray-500 gap-y-2 bg-gray-200 rounded-2xl border-1 border-gray-300 w-15 h-5 m-1">
+            Règles
+        </button>
+            <p v-if="afficherRègles" class="text-xs text-gray-500 m-1 text-center">
+            · pas plus de 2 symboles identiques à la suite <br>
+            · autant de X que de O par ligne/colonne <br>
+            · deux lignes ou deux colonnes ne peuvent pas être identiques.
+        </p>
+    <div class="bg-white w-fit rounded-3xl shadow-md p-4 flex flex-col items-center justify-center gap-4">
     <div>
         <h1 class="text-2xl font-bold mb-4">Binoxxo</h1>
     </div>
@@ -588,7 +650,7 @@ function résoudreClic(){
         <template v-for="(Ligne, L) in grille" :key="L" >
             <div v-for="(Case_, C) in Ligne" :key="C" 
                 class="w-10 h-10 border border-gray-300 text-center rounded-lg"
-                :class="{ 'bg-red-400': caseEnErreur(L, C), 'bg-amber-200': Ligne[C] === 0 && caseModifiable(L,C)===false, 'bg-teal-200': Ligne[C] === 1 && caseModifiable(L,C)===false,'bg-gray-100': caseModifiable(L,C)===true  }"
+                :class="{ 'bg-red-400': caseEnErreur(L, C), 'bg-amber-200': Ligne[C] === 0 && caseModifiable(L,C)===false && caseEnErreur(L,C)===false, 'bg-teal-200': Ligne[C] === 1 && caseModifiable(L,C)===false && caseEnErreur(L,C)===false,'bg-gray-100': caseModifiable(L,C)===true && caseEnErreur(L,C)===false}"
                 @click= "jouerCase(L , C)">
                 {{ changer10enXO(L,C)}}
             </div>
@@ -641,6 +703,14 @@ function résoudreClic(){
         @click="résoudreClic()">
         résoudre
         </button>
+    </div>
+    <button
+        class="bg-green-200 hover:bg-green-300 border-1 border-green-300 rounded-2xl p-2 mx-2 "
+        @click="indice()" >
+        indice
+    </button>
+    <div>
+        <p>{{ tempsFormaté() }}</p>
     </div>
 
         <!-- <button
