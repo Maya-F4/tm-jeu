@@ -355,3 +355,33 @@
 ### Prochaine étape (à faire la prochaine fois)
 - Les gros chantiers restent : grilles 4×4/8×8, page d'accueil (qui réglera aussi le petit souci du chrono au premier chargement).
 - Continuer à ajouter des techniques de déduction personnelles si Maya en trouve en jouant.
+
+## 2026-08-14 — Bug du chronomètre, page d'accueil et choix de difficulté
+
+### Bug du chronomètre corrigé
+- Constat de Maya : le chrono ne s'arrêtait jamais, et allait de plus en plus vite à chaque clic sur "grille aléatoire".
+- Cause : `démarrerChrono()` créait un nouveau `setInterval` à chaque appel, sans jamais arrêter le précédent — plusieurs chronomètres tournaient donc en parallèle, chacun incrémentant `secondesEcoulées` de son côté, et `idChrono` ne gardait que le dernier (les autres devenaient impossibles à arrêter).
+- Corrigé en ajoutant `clearInterval(idChrono)` en tout début de `démarrerChrono()`, pour garantir qu'un seul chrono tourne à la fois. Maya a aussi pensé elle-même à arrêter le chrono sur le bouton "résoudre", en plus de la victoire normale.
+- Nouveau point noté pour plus tard : le solveur devrait repartir de la grille de départ (`copieGrilleInitiale`) plutôt que de la grille actuelle, pour éviter de "résoudre" une grille qui contient déjà une erreur du joueur.
+
+### Page d'accueil et choix de difficulté
+- Discussion sur l'architecture : plutôt que Vue Router (un nouvel outil), réutilisation du principe déjà connu (`v-if` + variable réactive) pour basculer entre deux "écrans" (`écran = ref('accueil')`, valant `'accueil'` ou `'jeu'`).
+- Design simplifié décidé par Maya : un seul écran d'accueil, où les 3 boutons de difficulté apparaissent **sur place** (pas un écran séparé) au clic sur "Jouer" — réutilise le principe déjà connu de `afficherRègles`, avec `afficherChoixDifficulté`.
+- `nombreDeCaseACacher` (ref) : remplace le `26` codé en dur dans `cacherPlusieursCases()`, réglé par le bouton de difficulté choisi (Facile 15 / Moyen 20 / Difficile 26).
+- Bugs corrigés en cours de route :
+  - Les 3 valeurs de `nombreDeCaseACacher` avaient été copiées-collées identiques sur les 3 boutons au début — corrigé avec des valeurs distinctes.
+  - `générerGrilleAléatoire` appelée sans parenthèses sur les boutons de difficulté (donc jamais réellement exécutée) — même piège que `partieGagnee` rencontré plus tôt dans le projet, corrigé.
+- Deux petits ajustements visuels : la carte d'accueil et la carte du jeu ont maintenant la même largeur fixe (`w-96` sur les deux, au lieu de `w-fit` qui donnait des tailles très différentes) ; hauteur minimale (`min-h-96`) ajoutée seulement sur la carte d'accueil (pas celle du jeu, dont le contenu varie avec le message de victoire).
+
+### Nouveaux points ajoutés à la liste des choses à faire
+- Le chronomètre devrait démarrer seulement au premier coup joué, pas dès l'affichage de la grille.
+- Un moyen de changer de niveau de difficulté une fois qu'on est dans le jeu (retour à l'accueil).
+- Repenser la disposition des boutons sous la grille (Maya trouve que ça fait "trop chargé" actuellement).
+- Ajouter un fond d'écran fait par la sœur de Maya.
+- Une nouvelle police pour le titre "Binoxxo".
+- (Déjà fait aujourd'hui) Carte d'accueil à la même taille que la carte du jeu.
+
+### Prochaine étape (à faire la prochaine fois)
+- Reprendre la liste ci-dessus : chrono au premier coup, changer de niveau, redesign des boutons, fond d'écran, nouvelle police.
+- Faire en sorte que "résoudre" reparte de la grille de départ plutôt que de l'état actuel (évite de résoudre une grille contenant une erreur du joueur).
+- Gros chantier toujours en attente : grilles 4×4/8×8.

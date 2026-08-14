@@ -305,7 +305,7 @@ function cacherUneCase(){
 function cacherPlusieursCases(){
     let tentatives = 0
     let casesCachées = 0
-    while (casesCachées < 26 && tentatives < 200) {
+    while (casesCachées < nombreDeCaseACacher.value && tentatives < 200) {
         let L = Math.floor(Math.random()*6)
         let C = Math.floor(Math.random()*6)
         while (grille.value[L][C] === null) {
@@ -582,6 +582,7 @@ let résoluParOrdinateur = ref(false)
 function résoudreClic(){
     solveurLogique()
     résoluParOrdinateur.value = true
+    arreterChrono()
 }
 
 let afficherRègles= ref(false)
@@ -613,6 +614,7 @@ const secondesEcoulées = ref(0)
 let idChrono = null 
 
 function démarrerChrono (){
+    clearInterval(idChrono)
     secondesEcoulées.value = 0
     idChrono = setInterval(()=>{secondesEcoulées.value = secondesEcoulées.value+1},1000)
 }
@@ -628,6 +630,14 @@ function tempsFormaté () {
     return temps
 }
 
+/* page d'accueil */ 
+
+const écran=ref("accueil")
+
+const afficherChoixDifficulté = ref(false)
+
+const nombreDeCaseACacher = ref(20)
+
 </script>
 
 <template>
@@ -642,7 +652,8 @@ function tempsFormaté () {
             · autant de X que de O par ligne/colonne <br>
             · deux lignes ou deux colonnes ne peuvent pas être identiques.
         </p>
-    <div class="bg-white w-fit rounded-3xl shadow-md p-4 flex flex-col items-center justify-center gap-4">
+    <div v-if="écran==='jeu'" 
+    class="bg-white w-110 rounded-3xl shadow-md p-4 flex flex-col items-center justify-center gap-4">
     <div>
         <h1 class="text-2xl font-bold mb-4">Binoxxo</h1>
     </div>
@@ -723,9 +734,34 @@ function tempsFormaté () {
         <p v-if="partieGagnee() && résoluParOrdinateur === false" class="text-green-700 text-bold text-xl border-2 border-green-300 bg-green-200 rounded-2xl p-4">Félicitations ! Vous avez gagné ! 🎉</p>
     </div>
     <div>
-        <p v-if="résoluParOrdinateur === true" class="text-blue-700 text-bold text-xl border-2 border-blue-300 bg-blue-200 rounded-2xl p-4">La grille a été résolue par l'ordinateur !</p>
+        <p v-if="résoluParOrdinateur === true" class="text-blue-700 text-bold text-xl border-2 border-blue-300 bg-blue-200 rounded-2xl p-4">La grille a été résolue par l'ordinateur ! 🤖</p>
     </div>
     </div>
+
+    <div v-if="écran==='accueil'" class="bg-white rounded-3xl shadow-md p-4 flex flex-col items-center gap-4 w-110 min-h-96 ">
+        <h1 class="text-5xl">Binoxxo</h1>
+        <button @click="afficherChoixDifficulté=true" 
+        class="bg-teal-200 border-1 border-teal-300 rounded-full hover:bg-teal-300 p-2 text-3xl">
+            ▶︎
+        </button>
+        <div v-if="afficherChoixDifficulté">
+            <button class="bg-green-200 border-1 border-green-300 rounded-2xl hover:bg-green-300 p-2 mx-2"
+            @click="nombreDeCaseACacher=15; générerGrilleAléatoire() ; écran='jeu'">
+                facile
+            </button>
+            <button class="bg-yellow-200 border-1 border-yellow-300 rounded-2xl hover:bg-yellow-300 p-2 mx-2"
+            @click="nombreDeCaseACacher=20; générerGrilleAléatoire() ;écran='jeu'">
+                moyen
+            </button>
+            <button class="bg-rose-200 border-1 border-rose-300 rounded-2xl hover:bg-rose-300 p-2 mx-2"
+            @click="nombreDeCaseACacher=26; générerGrilleAléatoire() ;écran='jeu'">
+                difficile
+            </button>
+
+        </div>
+        
+    </div>
+
     </div>
     </div>
 </template> 
