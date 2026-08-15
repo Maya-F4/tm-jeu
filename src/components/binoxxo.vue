@@ -155,6 +155,9 @@ function jouerCase(L ,C) {
         sonWin.play()
         arreterChrono()
     }
+    if(secondesEcoulées.value===0){
+        démarrerChrono()
+    }
 }
 
 /*const dernierCoup = ref<null | {L: number, C: number}>(null)*
@@ -223,7 +226,8 @@ function caseEnErreur(L , C) {
 function resetGrille(){
     grille.value = JSON.parse(JSON.stringify(copieGrilleInitiale))
     résoluParOrdinateur.value = false
-    démarrerChrono()
+    arreterChrono()
+    secondesEcoulées.value=0
 }
 
 
@@ -286,7 +290,8 @@ function générerGrilleAléatoire(){
     remplirGrille(0 ,0)
     cacherPlusieursCases()
     résoluParOrdinateur.value = false
-    démarrerChrono()
+    arreterChrono()
+    secondesEcoulées.value=0
 }
 
 /*création cases aléatoires à cacher*/
@@ -655,8 +660,8 @@ const nombreDeCaseACacher = ref(20)
     <div v-if="écran==='jeu'" 
     class="bg-white w-110 rounded-3xl shadow-md p-4 flex flex-col items-center justify-center gap-4">
     <div>
-        <h1 class="text-2xl font-bold mb-4">Binoxxo</h1>
-    </div>
+        <h1 class="text-3xl font-bold mb-4 font-['BagelFatOne']">Binoxxo</h1>
+    </div> 
     <div class="grid grid-cols-6 gap-1 w-fit">
         <template v-for="(Ligne, L) in grille" :key="L" >
             <div v-for="(Case_, C) in Ligne" :key="C" 
@@ -739,7 +744,7 @@ const nombreDeCaseACacher = ref(20)
     </div>
 
     <div v-if="écran==='accueil'" class="bg-white rounded-3xl shadow-md p-4 flex flex-col items-center gap-4 w-110 min-h-96 ">
-        <h1 class="text-5xl">Binoxxo</h1>
+        <h1 class="text-5xl font-['BagelFatOne']">Binoxxo</h1>
         <button @click="afficherChoixDifficulté=true" 
         class="bg-teal-200 border-1 border-teal-300 rounded-full hover:bg-teal-300 p-2 text-3xl">
             ▶︎

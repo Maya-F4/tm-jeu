@@ -385,3 +385,20 @@
 - Reprendre la liste ci-dessus : chrono au premier coup, changer de niveau, redesign des boutons, fond d'écran, nouvelle police.
 - Faire en sorte que "résoudre" reparte de la grille de départ plutôt que de l'état actuel (évite de résoudre une grille contenant une erreur du joueur).
 - Gros chantier toujours en attente : grilles 4×4/8×8.
+
+## 2026-08-15 — Chrono au premier coup et nouvelle police
+
+### Chronomètre : démarrage au premier coup joué
+- Avant : le chrono démarrait dès l'affichage d'une nouvelle grille. Maintenant : `générerGrilleAléatoire`/`resetGrille` arrêtent seulement un chrono en cours et remettent le compteur à 0 (`arreterChrono()` + `secondesEcoulées.value = 0`), sans le redémarrer tout de suite.
+- `arreterChrono()` ajustée pour remettre `idChrono` à `null` après l'avoir arrêté (sinon impossible de savoir si un chrono est en cours ou non, puisque `clearInterval` ne réinitialise pas la variable qui gardait son identifiant).
+- Dans `jouerCase`, après qu'un coup soit joué : si `secondesEcoulées.value === 0`, on démarre le chrono à ce moment précis — donc uniquement au premier coup, pas avant. Fonctionne bien même en cas de double-clic très rapide, grâce à `démarrerChrono()` qui vide déjà systématiquement l'ancien intervalle avant d'en recréer un.
+
+### Nouvelle police pour le titre
+- Recherche d'une police "ronde et épaisse" pour le style ludique du jeu — Chewy proposée, puis encore plus ronde avec Sniglet/Bagel Fat One. Bagel Fat One choisie et téléchargée (fichier `.ttf`, pas via Google Fonts cette fois) et copiée dans `public/fonts/`.
+- Ajout d'une règle `@font-face` dans `style.css`, qui déclare la police personnalisée à partir du fichier local (`font-family: "BagelFatOne"; src: url("/fonts/BagelFatOne-Regular.ttf")`).
+- Appliquée aux deux titres "Binoxxo" (accueil et jeu) avec la syntaxe Tailwind pour police personnalisée : `font-['BagelFatOne']`.
+
+### Prochaine étape (à faire la prochaine fois)
+- "Résoudre" qui reparte de la grille de départ plutôt que de l'état actuel (toujours en attente, pas encore fait).
+- Changer de niveau une fois dans le jeu, redesign des boutons, fond d'écran de la sœur de Maya.
+- Gros chantier toujours en attente : grilles 4×4/8×8.
