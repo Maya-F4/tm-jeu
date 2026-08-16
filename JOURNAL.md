@@ -402,3 +402,30 @@
 - "Résoudre" qui reparte de la grille de départ plutôt que de l'état actuel (toujours en attente, pas encore fait).
 - Changer de niveau une fois dans le jeu, redesign des boutons, fond d'écran de la sœur de Maya.
 - Gros chantier toujours en attente : grilles 4×4/8×8.
+
+## 2026-08-16 — "Résoudre" corrigé, carte latérale, ajustements de style
+
+### Bug de "résoudre" corrigé
+- `résoudreClic()` remet maintenant `grille.value` à une copie de `copieGrilleInitiale` avant de lancer `solveurLogique()` (même principe que `resetGrille()`), au lieu de résoudre directement l'état affiché à l'écran — évite de "résoudre" une grille qui contient déjà une erreur ou un coup incohérent du joueur.
+- **Résultat testé et fonctionnel**, plusieurs fois de suite.
+
+### Nouvelle disposition : carte latérale accolée à la carte de jeu
+- Idée initiale (une mini-carte fixée indépendamment au bord de l'écran, `position: fixed`) abandonnée en cours de route au profit d'une carte accolée directement à la carte de jeu, pour qu'elles se déplacent ensemble comme un seul bloc.
+- Nouvelle `<div>` englobante commune (`flex items-stretch gap-2`, conditionnée par `v-if="écran==='jeu'"`, déplacé depuis la carte de jeu elle-même) contenant les deux cartes côte à côte : la mini-carte (boutons indice, résoudre, recommencer, grille aléatoire, puis un 5ème bouton "accueil" ajouté par Maya pour changer de niveau) et la carte de jeu principale.
+- Bug corrigé en cours de route : une balise `<div>` s'ouvrait et se refermait immédiatement (`></div>`), laissant tout son contenu prévu (les deux cartes) se retrouver hors de la structure `flex`, d'où un affichage "tout empilé" sans mise en page.
+
+### Style de la mini-carte
+- Boutons centrés (`items-center`, puis `justify-center` pour le centrage vertical dans un `flex-col`).
+- Essais de symboles (émojis puis symboles Unicode monochromes) pour raccourcir les boutons, finalement abandonnés au profit de texte court et uniforme (taille et couleur identiques sur les 5 boutons, `whitespace-nowrap` pour empêcher les retours à la ligne involontaires).
+- Palette bleu ciel choisie pour la mini-carte, parmi 3 propositions.
+- Point de vigilance noté pour plus tard : la palette de couleurs de l'ensemble du jeu commence à être un peu éclatée (bleu ciel, rose, vert, teal/ambre) — piste évoquée pour harmoniser les boutons Mode O/X/Effacer avec le bleu ciel, en gardant vert/rouge seulement pour les couleurs ayant un vrai rôle fonctionnel (validité, erreur).
+- Réglage de l'espace vide en haut/bas de la mini-carte reporté : sa hauteur est contrainte par `items-stretch` à s'aligner sur la carte de jeu (donc pas réductible), piste retenue pour plus tard : y ajouter du contenu utile (comme le chronomètre) plutôt que réduire sa taille.
+
+### Petits ajustements
+- `mt-4` ajouté sur le texte d'état de la grille ("Valide"/"Invalide"), pour ne plus qu'il soit collé directement sous la grille.
+- Bouton "accueil" ajouté par Maya dans la mini-carte, permettant de revenir à l'écran d'accueil et de rechoisir un niveau de difficulté — répond au point "changer de niveau" resté en attente depuis le 14 août.
+
+### Prochaine étape (à faire la prochaine fois)
+- Harmonisation des couleurs et autres réglages visuels : Maya va en discuter avec des amies avant de trancher.
+- Fond d'écran de la sœur de Maya toujours en attente.
+- Gros chantier toujours en attente : grilles 4×4/8×8.

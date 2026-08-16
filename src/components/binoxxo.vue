@@ -585,6 +585,7 @@ else {
 let résoluParOrdinateur = ref(false)
 
 function résoudreClic(){
+    grille.value = JSON.parse(JSON.stringify(copieGrilleInitiale))
     solveurLogique()
     résoluParOrdinateur.value = true
     arreterChrono()
@@ -639,25 +640,54 @@ function tempsFormaté () {
 
 const écran=ref("accueil")
 
-const afficherChoixDifficulté = ref(false)
+/*const afficherChoixDifficulté = ref(false)*/
 
 const nombreDeCaseACacher = ref(20)
 
 </script>
 
 <template>
-    <div class="bg-rose-50 flex items-center justify-center min-h-screen">
+    <div class="bg-sky-50 flex items-center justify-center min-h-screen">
     <div class="flex flex-col items-center justify-center py-8  ">
-        <button @click="afficherRègles= !afficherRègles"
-        class="text-xs text-gray-500 gap-y-2 bg-gray-200 rounded-2xl border-1 border-gray-300 w-15 h-5 m-1">
-            Règles
+    <div v-if="écran==='jeu'" class="flex items-stretch gap-2">
+        <div class="flex flex-col bg-white rounded-2xl shadow items-center justify-center gap-4 min-h-96">
+       <div>
+        <button
+        class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28"
+        @click="indice()" >
+        indice
         </button>
-            <p v-if="afficherRègles" class="text-xs text-gray-500 m-1 text-center">
-            · pas plus de 2 symboles identiques à la suite <br>
-            · autant de X que de O par ligne/colonne <br>
-            · deux lignes ou deux colonnes ne peuvent pas être identiques.
-        </p>
-    <div v-if="écran==='jeu'" 
+        </div>
+        <div>
+        <button
+        class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28"
+        @click="résoudreClic()">
+        résoudre
+        </button>
+        </div>
+        <div>
+        <button
+        class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28"
+        @click="resetGrille()">
+        recommencer
+        </button>
+        </div>
+        <div>
+        <button
+        class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28 whitespace-nowrap"
+        @click="générerGrilleAléatoire()">
+        grille aléatoire
+        </button>
+        </div>
+        <div>
+        <button
+        class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28 whitespace-nowrap"
+        @click="écran='accueil'">
+        accueil
+        </button>
+        </div>
+    </div>
+    <div
     class="bg-white w-110 rounded-3xl shadow-md p-4 flex flex-col items-center justify-center gap-4">
     <div>
         <h1 class="text-3xl font-bold mb-4 font-['BagelFatOne']">Binoxxo</h1>
@@ -692,7 +722,9 @@ const nombreDeCaseACacher = ref(20)
         :class="{ 'bg-rose-300': mode === 'effacer'}"
         @click="mode='effacer'">Effacer</button>
     </div>
-    
+    <div>
+        <p>temps: {{ tempsFormaté() }}</p>
+     </div>
 
 
     <!-- <button 
@@ -700,34 +732,6 @@ const nombreDeCaseACacher = ref(20)
         @click="choisirGrille()">
         nouvelle grille
     </button> -->
-
-    <div>
-        <button
-        class="bg-yellow-200 hover:bg-yellow-300 border-1 border-yellow-300 rounded-2xl p-2 mx-2"
-        @click="resetGrille()">
-        recommencer
-        </button>
-
-        <button
-        class="bg-purple-200 hover:bg-purple-300 border-1 border-purple-300 rounded-2xl p-2 mx-2"
-        @click="générerGrilleAléatoire()">
-        grille aléatoire
-        </button>
-
-        <button
-        class="bg-red-200 hover:bg-red-300 border-1 border-red-300 rounded-2xl p-2 mx-2"
-        @click="résoudreClic()">
-        résoudre
-        </button>
-    </div>
-    <button
-        class="bg-green-200 hover:bg-green-300 border-1 border-green-300 rounded-2xl p-2 mx-2 "
-        @click="indice()" >
-        indice
-    </button>
-    <div>
-        <p>{{ tempsFormaté() }}</p>
-    </div>
 
         <!-- <button
         class="bg-pink-300 hover:bg-pink-400 rounded-2xl p-2 mx-2"
@@ -742,14 +746,26 @@ const nombreDeCaseACacher = ref(20)
         <p v-if="résoluParOrdinateur === true" class="text-blue-700 text-bold text-xl border-2 border-blue-300 bg-blue-200 rounded-2xl p-4">La grille a été résolue par l'ordinateur ! 🤖</p>
     </div>
     </div>
+    </div>
 
     <div v-if="écran==='accueil'" class="bg-white rounded-3xl shadow-md p-4 flex flex-col items-center gap-4 w-110 min-h-96 ">
         <h1 class="text-5xl font-['BagelFatOne']">Binoxxo</h1>
-        <button @click="afficherChoixDifficulté=true" 
+        <!--<button @click="afficherChoixDifficulté=true" 
         class="bg-teal-200 border-1 border-teal-300 rounded-full hover:bg-teal-300 p-2 text-3xl">
             ▶︎
-        </button>
-        <div v-if="afficherChoixDifficulté">
+        </button> -->
+        <div>
+            <button @click="afficherRègles= !afficherRègles"
+            class="text-xs text-gray-500 gap-y-2 bg-gray-200 rounded-2xl border-1 border-gray-300 w-15 h-5 m-1">
+            Règles
+            </button>
+            <p v-if="afficherRègles" class="text-xs text-gray-500 m-1 text-center">
+            · pas plus de 2 symboles identiques à la suite <br>
+            · autant de X que de O par ligne/colonne <br>
+            · deux lignes ou deux colonnes ne peuvent pas être identiques.
+        </p>
+        </div>
+        <div>
             <button class="bg-green-200 border-1 border-green-300 rounded-2xl hover:bg-green-300 p-2 mx-2"
             @click="nombreDeCaseACacher=15; générerGrilleAléatoire() ; écran='jeu'">
                 facile
