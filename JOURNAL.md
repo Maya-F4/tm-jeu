@@ -429,3 +429,43 @@
 - Harmonisation des couleurs et autres réglages visuels : Maya va en discuter avec des amies avant de trancher.
 - Fond d'écran de la sœur de Maya toujours en attente.
 - Gros chantier toujours en attente : grilles 4×4/8×8.
+
+## 2026-08-29 — Grilles de tailles multiples (4×4/6×6/8×8)
+
+### Décisions prises
+- Trois tailles fixes (4×4, 6×6, 8×8), choisies par bouton — une taille personnalisée (cachée) reste une idée pour plus tard, non tranchée.
+- Écran d'accueil restructuré : taille et difficulté toutes les deux visibles et sélectionnables en même temps (au lieu d'un système de révélation en cascade), avec un bouton "Jouer" final qui ne lance la partie que si les deux ont été explicitement choisies.
+- `déduireParExclusion` (la technique de déduction la plus complexe) reste réservée aux grilles 6×6 : son raisonnement combine règle du triplet et règle de comptage d'une façon qui ne se transpose pas proprement à d'autres tailles (sur 4×4 elle devient redondante avec `déduireParComptage`, sur 8×8 elle ne suffit plus à forcer la même contradiction) — la généraliser vraiment serait un chantier à part entière. Les 5 autres techniques de déduction restent, elles, pleinement généralisées à toutes les tailles.
+- Le nombre de cases à cacher n'est plus un nombre fixe (15/20/26, pensé pour 36 cases) mais une **proportion** (`proportionACacher`, en %) du nombre total de cases, recalculée à chaque génération en fonction de la taille choisie.
+
+### Ce qui a été codé dans `src/components/binoxxo.vue`
+- `tailleDeGrille` (`ref<null | 4 | 6 | 8>(null)`) et `proportionACacher` (`ref<null | 30 | 50 | 70>(null)`) : `null` tant que le joueur n'a rien choisi, même principe que `mode`/`dernierCoup`.
+- `vérifierJouabilité()` et `commencerPartie()` : la garde qui n'autorise le passage à l'écran de jeu (et la génération d'une grille) que si les deux réglages ont été faits.
+- Toutes les fonctions de règles, génération et solveur généralisées pour utiliser `tailleDeGrille.value` à la place du `6` codé en dur : `grilleVide`, `getColonne`, `pasdeTriplet`, `equilibre` (dont le seuil devient `tailleDeGrille.value/2`), `ligneComplete`, `ligneIdentique`, `unicitéLignes`/`unicitéColonnes`, `vérifierGrille`, `caseSuivante`, `cacherUneCase`, `cacherPlusieursCases`, `compterCasesVides`, `indice`, `déduireParComptage`, `déduireSandwich`, `déduireAprèsPaire`, `déduireAvantPaire`, `ligneCompatible`, `déduireComparaison`/`déduireComparaisonColonnes`, `appliquerColonne`, `UnePasseDeDéduction`. Plusieurs de ces bornes n'étaient pas des `6` directs (ex. le `4` de `pasdeTriplet`, le `5` de `caseSuivante`, les bornes décalées des techniques de motifs) — il a fallu à chaque fois retrouver la vraie relation avec la taille avant de généraliser, pas un simple remplacement de texte.
+- `cacherPlusieursCases()` calcule maintenant `nombreDeCaseACacher.value` à partir de `proportionACacher.value` et `tailleDeGrille.value` (`Math.floor(proportion/100 * taille * taille)`), recalculé à chaque génération.
+- Affichage de la grille rendu dynamique : `grid-cols-6` (classe Tailwind statique) remplacée par `:style="{ gridTemplateColumns: 'repeat(' + tailleDeGrille + ', minmax(0, 1fr))' }"`, nécessaire car Tailwind ne peut pas générer une classe dont le nombre est calculé au moment de l'exécution.
+- **Résultat testé et fonctionnel** sur les 3 tailles, avec les 3 niveaux de difficulté chacune.
+
+### Bugs corrigés en cours de route
+- Classes Tailwind écrites directement sur la balise (`<div flex flex-col items-center>`) au lieu d'être regroupées dans `class="..."` — aucun effet, elles doivent être dans l'attribut pour être reconnues.
+- `écran="jeu"` sans `.value`, à l'intérieur d'une fonction du script : comme `écran` est déclarée avec `const`, cette ligne aurait provoqué une vraie erreur ("Assignment to constant variable") et bloqué l'exécution, pas juste un bug silencieux.
+- `.value` manquant dans `vérifierJouabilité()` (comparait l'objet `ref` lui-même à `null`, toujours faux) — même famille de piège que le précédent.
+- Une vérification (`vérifierJouabilité()`) appelée en dernier dans un `@click` à trois instructions, sans que son résultat ne soit utilisé pour bloquer quoi que ce soit — corrigé en la déplaçant dans une vraie garde (`if`) à l'intérieur d'une fonction dédiée (`commencerPartie`).
+- Portée des variables mal placée à deux reprises dans la construction de `grilleVide` généralisée : une déclaration en dehors de la fonction (partagée entre tous les appels, jamais réinitialisée) puis, une fois corrigée, encore un cran trop bas (à l'intérieur des boucles, donc invisible en dehors) — corrigé en plaçant chaque variable au niveau exact de sa durée de vie réelle (la grille pour toute la fonction, une ligne pour un tour de boucle extérieure).
+- Boutons de difficulté qui lançaient encore directement la partie (`écran='jeu'`) après le passage à l'affichage "tout visible en même temps" — laissés par erreur, retirés pour que seul le bouton "Jouer" final déclenche la partie.
+
+### Nouvelle liste de choses à faire, ajoutée par Maya
+- Centrer les X et les O au milieu des cases.
+- Trouver et changer le son des touches (clic).
+- Améliorer l'affichage de l'écran d'accueil : bouton de mode resté visuellement "enfoncé" une fois choisi, le bouton "Jouer" isolé dérange visuellement (ajouter du texte ou une autre idée).
+- Rendre le jeu jouable sur tout type d'écran (responsive).
+- Afficher un message clair si le joueur clique sur "Jouer" sans avoir choisi taille et/ou difficulté (actuellement, rien ne se passe, sans explication).
+- Éventuellement un bouton caché (réservé à Maya) pour tester d'autres tailles de grille que 4×4/6×6/8×8.
+- Améliorer l'affichage du temps (actuellement `0:0`, jugé trop primaire).
+- Suggestion du professeur de Maya : que le bouton "indice" ne révèle plus une case **aléatoire** parmi celles déductibles, mais réfléchisse à donner la case la plus utile pour aider le joueur à avancer.
+- Limiter le nombre d'indices utilisables par partie (actuellement illimité, ce qui permettrait de finir une grille entière sans réfléchir).
+
+### Prochaine étape (à faire la prochaine fois)
+- Reprendre la liste ci-dessus, dans l'ordre que Maya choisira.
+- Idée de Maya pour plus tard : résoudre elle-même des grilles 8×8 et 4×4 à la main (comme elle l'a fait pour le 6×6) afin de découvrir les techniques de déduction propres à ces tailles.
+- Harmonisation des couleurs (en attente depuis le 16 août), fond d'écran de la sœur de Maya.
