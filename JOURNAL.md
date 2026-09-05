@@ -469,3 +469,32 @@
 - Reprendre la liste ci-dessus, dans l'ordre que Maya choisira.
 - Idée de Maya pour plus tard : résoudre elle-même des grilles 8×8 et 4×4 à la main (comme elle l'a fait pour le 6×6) afin de découvrir les techniques de déduction propres à ces tailles.
 - Harmonisation des couleurs (en attente depuis le 16 août), fond d'écran de la sœur de Maya.
+
+## 2026-09-05 — Fonds d'écran, centrage, bouton "Jouer" et affichage du temps
+
+### Fonds d'écran de la sœur de Maya (essayés, puis abandonnés au profit d'une version en couleurs)
+- 4 images reçues (bleu pour l'accueil, vert/jaune/rose pour les 3 tailles), copiées dans `public/images/`.
+- Tentative avec `background-image` dynamique (`:style`, fonction `styleFond()` selon l'écran et `tailleDeGrille`) : `bg-cover` rognait trop l'image (agrandissement/recadrage), `bg-contain` proposé en alternative (montre tout, quitte à laisser un peu de vide).
+- Décision finale de Maya : abandon des images, gardé seulement le principe (une fonction qui retourne une valeur selon l'état) mais appliqué à une **couleur** de fond plutôt qu'une image — `fondCouleur()` : bleu clair sur l'accueil, vert/jaune/rose selon `tailleDeGrille` une fois en jeu.
+
+### Centrage des X/O dans les cases
+- Ajout de `flex items-center justify-center` sur la `class` des cases, en plus de `text-center` déjà présent (qui ne centrait que horizontalement) — règle enfin le centrage vertical.
+
+### Curseur personnalisé selon le mode (exploré, mis de côté)
+- Discussion sur les limites de CSS (pas de curseur "rond"/"gomme" intégré, seulement `crosshair` pour une croix) et la possibilité technique d'un curseur emoji via un petit SVG encodé en data URI (`encodeURIComponent`) — jugé pas nécessaire, idée abandonnée par Maya pour l'instant.
+
+### Nouvelle carte pour le bouton "Jouer"
+- Comparaison de 3 pistes visuelles pour rendre le bouton "Jouer" plus visible (bouton plus gros et saturé / bouton réactif à l'état / texte d'accroche + bouton pilule) — **carte séparée, sous la carte principale de l'accueil** choisie par Maya, avec le style "bouton plus gros" (option A).
+- Restructuration en deux cartes blanches empilées verticalement (même principe que la carte latérale du 16 août, mais en colonne plutôt qu'en ligne) : `v-if="écran==='accueil'"` remonté sur une nouvelle `<div>` englobante (`flex flex-col items-center gap-2`), la grande carte perd son `v-if` et le bloc du bouton "Jouer", une nouvelle petite carte contient uniquement ce bouton.
+
+### Message d'erreur si taille/difficulté non choisies
+- `messageErreur()` : retourne un texte précis selon ce qui manque (taille, difficulté, ou les deux), chaîne vide si tout est bon — écrite par Maya en autonomie complète, correcte du premier coup.
+- Affiché seulement après une première tentative de clic sur "Jouer" (pas avant, pour ne pas décourager avant même d'avoir essayé) : nouvelle variable `aTenteDeJouer` (ref booléen, `false` au départ), mise à `true` en tout début de `commencerPartie()`, et le message conditionné par `aTenteDeJouer && messageErreur() !== ''`.
+
+### Affichage du temps amélioré
+- Ancien format : `minute + " : " + seconde` donnait des résultats comme `"0 : 5"`. Corrigé : espaces retirés autour de `:`, et un zéro ajouté devant les secondes si `< 10` (`"0:05"` plutôt que `"0:5"`).
+
+### Prochaine étape (à faire la prochaine fois)
+- Reprendre la liste du 29 août encore en attente : rendre le jeu jouable sur tout type d'écran (responsive), bouton caché pour tester d'autres tailles de grille, indice plus intelligent (pas aléatoire) + nombre d'indices limité par partie.
+- Harmonisation des couleurs (en attente depuis le 16 août).
+- Idée de Maya pour plus tard : résoudre elle-même des grilles 8×8 et 4×4 à la main pour découvrir de nouvelles techniques de déduction.

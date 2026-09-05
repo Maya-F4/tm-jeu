@@ -650,7 +650,10 @@ function arreterChrono(){
 function tempsFormaté () {
     let minute= Math.floor(secondesEcoulées.value / 60)
     let seconde= secondesEcoulées.value % 60
-    let temps= minute + " : " + seconde 
+    let temps= minute + ":" + seconde 
+    if (seconde<10){
+        temps= minute + ":0" + seconde
+    }
     return temps
 }
 
@@ -678,18 +681,66 @@ function vérifierJouabilité (){
 }
 
 function commencerPartie(){
+    aTenterDeJouer.value=true
     if(vérifierJouabilité()=== true){
         écran.value="jeu"
         générerGrilleAléatoire()
     }
 }
 
+/*function styleFond(){
+    if (écran.value==="accueil"){
+        return 'url(/images/fond-bleu.jpg)'
+    }
+    if (tailleDeGrille.value===4){
+        return 'url(/images/fond-vert.jpg)'
+    }
+    if (tailleDeGrille.value===6){
+        return 'url(/images/fond-jaune.jpg)'
+    }
+    if (tailleDeGrille.value===8){
+        return 'url(/images/fond-rose.jpg)'
+    }
+}*/
+
+function fondCouleur (){
+    if (écran.value==="accueil"){
+        return 'bg-sky-100'
+    }
+    if (tailleDeGrille.value===4){
+        return 'bg-green-100'
+    }
+    if (tailleDeGrille.value===6){
+        return 'bg-yellow-100'
+    }
+    if (tailleDeGrille.value===8){
+        return 'bg-rose-100'
+    }
+}
+
+function messageErreur(){
+    if (tailleDeGrille.value===null && proportionACacher.value===null){
+        return "Veuillez choisir la taille et le niveau de la grille."
+    }
+    if (tailleDeGrille.value===null){
+        return "Veuillez choisir la taille de la grille."
+    }
+    if (proportionACacher.value===null){
+        return "Veuillez choisir le niveau de la grille."
+    }
+
+    return ""
+}
+
+const aTenterDeJouer = ref(false)
+
 
 
 </script>
 
 <template>
-    <div class="bg-sky-50 flex items-center justify-center min-h-screen">
+    <div :class="fondCouleur()"
+    class=" flex items-center justify-center min-h-screen">
     <div class="flex flex-col items-center justify-center py-8  ">
     <div v-if="écran==='jeu'" class="flex items-stretch gap-2">
         <div class="flex flex-col bg-white rounded-2xl shadow items-center justify-center gap-4 min-h-96">
@@ -738,7 +789,7 @@ function commencerPartie(){
     <div class="grid gap-1 w-fit" :style="{ gridTemplateColumns: 'repeat(' + tailleDeGrille + ', minmax(0, 1fr))' }">
         <template v-for="(Ligne, L) in grille" :key="L" >
             <div v-for="(Case, C) in Ligne" :key="C" 
-                class="w-10 h-10 border border-gray-300 text-center rounded-lg"
+                class="w-10 h-10 border border-gray-300 text-center rounded-lg center flex items-center justify-center cursor-pointer text-lg "
                 :class="{ 'bg-red-400': caseEnErreur(L, C), 'bg-amber-200': Ligne[C] === 0 && caseModifiable(L,C)===false && caseEnErreur(L,C)===false, 'bg-teal-200': Ligne[C] === 1 && caseModifiable(L,C)===false && caseEnErreur(L,C)===false,'bg-gray-100': caseModifiable(L,C)===true && caseEnErreur(L,C)===false}"
                 @click= "jouerCase(L , C)">
                 {{ changer10enXO(L,C)}}
@@ -790,8 +841,8 @@ function commencerPartie(){
     </div>
     </div>
     </div>
-
-    <div v-if="écran==='accueil'" class="bg-white rounded-3xl shadow-md p-4 flex flex-col items-center gap-4 w-110 min-h-96 ">
+<div v-if="écran==='accueil'" class="flex flex-col items-center gap-2">
+    <div class="bg-white rounded-3xl shadow-md p-4 flex flex-col items-center gap-4 w-110 min-h-86 ">
         <h1 class="text-blue-950 text-6xl font-['BagelFatOne']">Binoxxo</h1>
         <!--<button @click="afficherChoixDifficulté=true" 
         class="bg-teal-200 border-1 border-teal-300 rounded-full hover:bg-teal-300 p-2 text-3xl">
@@ -814,16 +865,19 @@ function commencerPartie(){
             </p>
         </div>
         <div>
-            <button class="bg-green-200 border-1 border-green-300 rounded-2xl hover:bg-green-300 p-2 mx-2"
-            @click="tailleDeGrille=4">
+            <button class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
+            @click="tailleDeGrille=4"
+            :class="{ 'bg-orange-300 shadow': tailleDeGrille === 4 }">
                 4x4
             </button>
-            <button class="bg-yellow-200 border-1 border-yellow-300 rounded-2xl hover:bg-yellow-300 p-2 mx-2"
-            @click="tailleDeGrille=6">
+            <button class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
+            @click="tailleDeGrille=6"
+            :class="{ 'bg-orange-300 shadow': tailleDeGrille === 6 }">
                 6x6
             </button>
-            <button class="bg-rose-200 border-1 border-rose-300 rounded-2xl hover:bg-rose-300 p-2 mx-2"
-            @click="tailleDeGrille=8">
+            <button class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
+            @click="tailleDeGrille=8"
+            :class="{ 'bg-orange-300 shadow': tailleDeGrille === 8 }">
                 8x8
             </button>
         </div>
@@ -833,27 +887,39 @@ function commencerPartie(){
             </p>
         </div>
         <div>
-            <button class="bg-green-200 border-1 border-green-300 rounded-2xl hover:bg-green-300 p-2 mx-2"
-            @click="proportionACacher=30">
+            <button class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
+            @click="proportionACacher=30"
+            :class="{ 'bg-orange-300 shadow': proportionACacher === 30 }">
                 facile
             </button>
-            <button class="bg-yellow-200 border-1 border-yellow-300 rounded-2xl hover:bg-yellow-300 p-2 mx-2"
-            @click="proportionACacher=50">
+            <button class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
+            @click="proportionACacher=50"
+            :class="{ 'bg-orange-300 shadow': proportionACacher === 50 }">
                 moyen
             </button>
-            <button class="bg-rose-200 border-1 border-rose-300 rounded-2xl hover:bg-rose-300 p-2 mx-2"
-            @click="proportionACacher=70">
+            <button class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
+            @click="proportionACacher=70"
+            :class="{ 'bg-orange-300 shadow': proportionACacher === 70 }">
                 difficile
             </button>
         </div>
-        <div>
-            <button @click="commencerPartie()"
-            class="bg-blue-200 border-1 border-blue-300 rounded-2xl hover:bg-blue-300 p-2 mx-2">
-                jouer
-            </button>
-        </div>
+
         
     </div>
+    <div class="bg-white rounded-3xl shadow-md p-4 flex flex-col items-center gap-2 w-110 ">
+        <p v-if="aTenterDeJouer===true && messageErreur()!==''" class="text-blue-950 text-sm">
+            {{ messageErreur() }}
+        </p>
+        <div>
+            <button @click="commencerPartie()"
+            class="bg-blue-200 border-1 border-blue-300 rounded-2xl hover:bg-blue-300 p-2 mx-2 w-68 text-lg">
+                jouer 
+            </button>
+        </div>
+
+    </div>
+</div>  
+
 
     </div>
     </div>
