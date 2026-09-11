@@ -146,6 +146,9 @@ function jouerCase(L ,C) {
         return
     }
     grille.value[L][C] = mode.value
+    if (grille.value[L][C]!==grilleSolution[L][C]){
+        nombreErreur.value=nombreErreur.value+1
+    }
     sonClic.currentTime = 0
     sonClic.play()
     résoluParOrdinateur.value = false
@@ -158,6 +161,7 @@ function jouerCase(L ,C) {
     if(secondesEcoulées.value===0){
         démarrerChrono()
     }
+
 }
 
 /*const dernierCoup = ref<null | {L: number, C: number}>(null)*
@@ -217,9 +221,14 @@ function unicitéColonnes() {
 }
 
 function caseEnErreur(L , C) {
-    if(equilibre(grille.value[L]) === false || pasdeTriplet(grille.value[L]) === false || equilibre(getColonne(C)) === false || pasdeTriplet(getColonne(C)) === false) {
-        return true
+    if (grille.value[L][C] !== null) {
+        if (grilleSolution[L][C] !== grille.value[L][C]) { 
+            return true 
+        }
     }
+    /*if(equilibre(grille.value[L]) === false || pasdeTriplet(grille.value[L]) === false || equilibre(getColonne(C)) === false || pasdeTriplet(getColonne(C)) === false) {
+        return true
+    }*/
     return false
 }
 
@@ -228,6 +237,8 @@ function resetGrille(){
     résoluParOrdinateur.value = false
     arreterChrono()
     secondesEcoulées.value=0
+    nombreIndice.value=0
+    nombreErreur.value=0
 }
 
 
@@ -299,13 +310,18 @@ function remplirGrille(L ,C) {
     return false
 }
 
+let grilleSolution = JSON.parse(JSON.stringify(grille.value))
+
 function générerGrilleAléatoire(){
     grille.value = grilleVide()
     remplirGrille(0 ,0)
+    grilleSolution = JSON.parse(JSON.stringify(grille.value))
     cacherPlusieursCases()
     résoluParOrdinateur.value = false
     arreterChrono()
     secondesEcoulées.value=0
+    nombreIndice.value=0
+    nombreErreur.value=0
 }
 
 /*création cases aléatoires à cacher*/
@@ -489,7 +505,7 @@ function déduireComparaisonColonnes(){
 
 
 function déduireParExclusion(Ligne){
-    if (tailleDeGrille.value===6){
+if (tailleDeGrille.value===6){
     if (Ligne[0]===Ligne[5] && Ligne[0]!==null && Ligne[1]!==null && Ligne[1]!==Ligne[0] && Ligne[2]===null && Ligne[3]===null && Ligne[4]===null){
         Ligne[4]=valeurOpposée(Ligne[0])
 }
@@ -617,7 +633,7 @@ const sonWin = new Audio ("/sons/victoire.wav")
 
 function indice(){
     const sauvegarde = JSON.parse(JSON.stringify(grille.value))
-    solveurLogique()
+    UnePasseDeDéduction()
     const candidats = []
     for (let L=0 ; L<tailleDeGrille.value ; L=L+1){
         for (let C=0 ; C<tailleDeGrille.value ; C=C+1){
@@ -631,6 +647,7 @@ function indice(){
     const valeurTrouvée = grille.value[caseChoisie.L][caseChoisie.C]
     grille.value = sauvegarde
     grille.value[caseChoisie.L][caseChoisie.C] = valeurTrouvée
+    nombreIndice.value = nombreIndice.value + 1
 }
 
 const secondesEcoulées = ref(0)
@@ -734,6 +751,9 @@ function messageErreur(){
 
 const aTenterDeJouer = ref(false)
 
+let nombreIndice= ref(0)
+
+let nombreErreur= ref(0)
 
 
 </script>
@@ -743,6 +763,9 @@ const aTenterDeJouer = ref(false)
     class=" flex items-center justify-center min-h-screen">
     <div class="flex flex-col items-center justify-center py-8  ">
     <div v-if="écran==='jeu'" class="flex items-stretch gap-2">
+        <div> 
+            <p> nombre d'erreurs: {{ nombreErreur }} </p>
+        </div>
         <div class="flex flex-col bg-white rounded-2xl shadow items-center justify-center gap-4 min-h-96">
        <div>
         <button

@@ -498,3 +498,33 @@
 - Reprendre la liste du 29 août encore en attente : rendre le jeu jouable sur tout type d'écran (responsive), bouton caché pour tester d'autres tailles de grille, indice plus intelligent (pas aléatoire) + nombre d'indices limité par partie.
 - Harmonisation des couleurs (en attente depuis le 16 août).
 - Idée de Maya pour plus tard : résoudre elle-même des grilles 8×8 et 4×4 à la main pour découvrir de nouvelles techniques de déduction.
+
+## 2026-09-11 — Son, indices "sûrs", vraie solution sauvegardée, début du système de 3 erreurs
+
+### Ajustements rapides
+- Nouveau son de clic trouvé sur Mixkit, copié dans `public/sons/clic.wav` (remplace l'ancien).
+- Couleurs jugées satisfaisantes par Maya — l'harmonisation des couleurs (en attente depuis le 16 août) est considérée terminée.
+- Décisions sur la liste de tâches : responsive reporté à plus tard, bouton caché pour tester d'autres tailles abandonné définitivement.
+- Discussion (informative, pas de code) sur comment transformer le jeu en application une fois le responsive fait : PWA (installable depuis le navigateur, rapide, pas de réécriture) vs Capacitor (vraie app iOS/Android publiable, réutilise le code Vue existant) — recommandation de commencer par la PWA le moment venu.
+
+### Indice "intelligent" — première correction
+- Constat : l'ancien `indice()` lançait `solveurLogique()` (plusieurs passages en cascade) puis piochait au hasard parmi toutes les cases déduites — certaines n'étaient déductibles qu'après plusieurs étapes intermédiaires invisibles pour la joueuse, rendant l'indice difficile à comprendre.
+- Corrigé : `indice()` utilise maintenant `UnePasseDeDéduction()` (un seul passage) au lieu de `solveurLogique()` — chaque indice donné est désormais déductible en une seule étape, directement depuis l'état actuel de la grille.
+- Discussion sur une amélioration plus poussée (essayer chaque technique séparément dans un ordre de difficulté, afficher laquelle a été utilisée) : jugée non nécessaire pour l'instant par Maya, mise de côté (pas abandonnée, juste pas prioritaire).
+
+### Grande avancée : sauvegarde de la vraie solution et vérification exacte
+- Repris un fil laissé en suspens depuis les 28/31 juillet : à l'époque, comparer les coups du joueur à "la vraie solution" avait été écarté faute de solution garantie unique. Discussion qui a permis de clarifier **pourquoi** cette garantie existe maintenant : comme les 6 techniques de déduction ne concluent jamais une valeur sauf si elle est logiquement forcée, le fait que `solveurLogique()` arrive à tout résoudre prouve mathématiquement que la solution est unique — pas besoin d'un vérificateur d'unicité séparé.
+- `grilleSolution` (nouvelle variable `let`) : sauvegarde une copie indépendante de la grille juste après `remplirGrille()`, avant que `cacherPlusieursCases()` ne cache des cases — donc la vraie solution complète du puzzle en cours.
+- `caseEnErreur(L, C)` simplifiée et rendue plus précise : compare directement `grille.value[L][C]` à `grilleSolution[L][C]` plutôt que de vérifier si la ligne/colonne casse une règle — corrige au passage l'ancien défaut où toute une ligne/colonne s'allumait en rouge à cause d'une seule case fautive.
+
+### Début du système "3 erreurs = partie perdue"
+- Comparaison visuelle de deux pistes (compteur de vies visible pendant la partie / rien jusqu'au blocage final) — **compteur visible** choisi par Maya.
+- `nombreErreur` (ref, démarre à 0) : incrémenté dans `jouerCase`, juste après qu'un coup soit joué, si la valeur posée ne correspond pas à `grilleSolution[L][C]` — chaque mauvaise tentative compte, même si elle est corrigée ensuite.
+- **Pas encore fait** : remettre `nombreErreur` à 0 dans `générerGrilleAléatoire()` et `resetGrille()` (repéré en fin de session, pas corrigé) ; la fonction `partiePerdue()` (3 erreurs atteintes) ; le blocage de `jouerCase` une fois la partie perdue ; l'affichage des points de vie et du message "Partie perdue" avec les boutons "Recommencer"/"Nouvelle grille" dans le template.
+- Petite confusion en cours de route : Maya avait commencé, de son côté, un compteur `nombreIndice` (pour une future limite du nombre d'indices par partie, un point différent de la liste) — bonne initiative, mais mis de côté le temps de finir "3 erreurs" d'abord.
+
+### Prochaine étape (à faire la prochaine fois)
+- Terminer "3 erreurs = partie perdue" : reset de `nombreErreur`, fonction `partiePerdue()`, blocage de `jouerCase`, affichage (points de vie + message de fin + boutons).
+- Reprendre le fil de `nombreIndice` (limite du nombre d'indices par partie), démarré en parallèle.
+- Rendre le jeu jouable sur tout type d'écran (responsive), puis explorer la transformation en application (PWA).
+- Idée de Maya en continu : résoudre elle-même des grilles 8×8 et 4×4 à la main pour découvrir de nouvelles techniques de déduction.
