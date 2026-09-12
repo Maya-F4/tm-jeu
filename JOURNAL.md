@@ -528,3 +528,30 @@
 - Reprendre le fil de `nombreIndice` (limite du nombre d'indices par partie), démarré en parallèle.
 - Rendre le jeu jouable sur tout type d'écran (responsive), puis explorer la transformation en application (PWA).
 - Idée de Maya en continu : résoudre elle-même des grilles 8×8 et 4×4 à la main pour découvrir de nouvelles techniques de déduction.
+
+## 2026-09-12 — Push GitHub réparé, système de 3 erreurs terminé, limite d'indices
+
+### Problème de `git push` résolu
+- Les commits locaux n'arrivaient pas sur GitHub (`RPC failed; HTTP 400`, `unexpected disconnect while reading sideband packet`) — cause identifiée : les 4 images de fond d'écran de la sœur de Maya (~12 Mo au total, jamais utilisées dans le code final mais restées dans `public/images/` et commitées) rendaient le push trop volumineux pour la mémoire tampon HTTP par défaut de git.
+- Corrigé en augmentant cette limite : `git config http.postBuffer 524288000` (réglage local et permanent pour ce projet) — push réussi immédiatement après.
+- Point noté pour plus tard, non urgent : les 4 images inutilisées pourraient être supprimées du dépôt un jour pour l'alléger.
+
+### Système "3 erreurs = partie perdue" terminé
+- `partiePerdue()` : `nombreErreur.value >= 3`.
+- Bug corrigé dans `jouerCase` : garde écrite `if (partiePerdue === true)` (référence à la fonction, jamais vraie) au lieu de `partiePerdue() === true` — même piège que `v-if="partieGagnee"` du 11 août, retrouvé et corrigé par Maya après rappel.
+- `arreterChrono()` ajouté au moment précis où `nombreErreur` atteint 3, à l'intérieur du bloc qui vient d'incrémenter le compteur.
+- Affichage : remplacement du texte brut "nombre d'erreurs" par 3 petits ronds (`<span>` avec `rounded-full`, bordure visible même vide, `:class` qui colore en rouge selon des seuils `nombreErreur >= 1/2/3`) — reprend le même principe que les boutons Mode déjà connus.
+- Message "Vous avez perdu ! 😢" ajouté (sans boutons dédiés, Maya a choisi de garder juste le message — les boutons "recommencer"/"grille aléatoire" déjà présents dans la mini-carte latérale restent utilisables pour rejouer).
+- Deux bugs de mise en page corrigés : les 3 messages de fin de partie (victoire/résolu par ordinateur/perdu) étaient chacun enveloppés dans une `<div>` sans `v-if`, donc restaient présentes (vides) et ajoutaient un `gap-4` fantôme à chaque fois — corrigé en mettant le `v-if` directement sur chaque `<p>`, sans `<div>` autour. Et le titre "Binoxxo" avait un `mb-4` qui s'additionnait au `gap-4` du parent (même piège que les boutons du 13 août) — retiré.
+- Un bug non reproductible rencontré en cours de route (le chrono semblait ne plus s'arrêter à la 3ème erreur) — débogué avec un `console.log` temporaire, le code lui-même s'est avéré correct, le souci ne s'est pas reproduit au deuxième essai (probablement un intervalle resté actif d'un test précédent).
+
+### Limite du nombre d'indices par partie (fonctionnalité démarrée en parallèle par Maya)
+- `nombreIndice` (ref, remis à 0 à chaque nouvelle grille) : une garde en tout début d'`indice()` (`if (nombreIndice.value >= 3) { return }`) empêche d'en redemander au-delà de 3, incrémenté à chaque indice donné avec succès.
+- Affichage "indices:3/3" ajouté sous le bouton "indice".
+- Bug de mise en page corrigé : le bouton "indice" avait `m-2` (marge sur les 4 côtés) qui poussait le texte du compteur trop loin en dessous — remplacé par `mx-2` (marge seulement horizontale) et le bloc entier transformé en `flex flex-col items-center gap-1` pour un espacement propre et voulu.
+- **Résultat testé et fonctionnel** : les deux systèmes (3 erreurs, 3 indices) tournent correctement ensemble.
+
+### Prochaine étape (à faire la prochaine fois)
+- Rendre le jeu jouable sur tout type d'écran (responsive), puis explorer la transformation en application (PWA, puis Capacitor si souhaité).
+- Projet perso en continu : résoudre des grilles 8×8/4×4 à la main pour trouver de nouvelles techniques de déduction.
+- Mis de côté volontairement, à reprendre seulement si l'envie revient : indice "le plus stratégique" (débloquant le plus de cases), affichage de la technique utilisée par chaque indice.

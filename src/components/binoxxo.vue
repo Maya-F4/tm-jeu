@@ -135,6 +135,9 @@ function caseModifiable(L ,C) {
 }
 
 function jouerCase(L ,C) {
+    if (partiePerdue() === true){
+        return
+    }
     if (caseModifiable(L ,C) === false) {
         return
     }
@@ -148,6 +151,9 @@ function jouerCase(L ,C) {
     grille.value[L][C] = mode.value
     if (grille.value[L][C]!==grilleSolution[L][C]){
         nombreErreur.value=nombreErreur.value+1
+        if (partiePerdue()===true){
+            arreterChrono()
+        }
     }
     sonClic.currentTime = 0
     sonClic.play()
@@ -632,6 +638,9 @@ const sonClic = new Audio ("/sons/clic.wav")
 const sonWin = new Audio ("/sons/victoire.wav")
 
 function indice(){
+    if (nombreIndice.value>=3){
+        return
+    }
     const sauvegarde = JSON.parse(JSON.stringify(grille.value))
     UnePasseDeDéduction()
     const candidats = []
@@ -755,6 +764,12 @@ let nombreIndice= ref(0)
 
 let nombreErreur= ref(0)
 
+function partiePerdue(){
+    if (nombreErreur.value>=3){
+        return true
+    }
+    return false
+}
 
 </script>
 
@@ -762,17 +777,28 @@ let nombreErreur= ref(0)
     <div :class="fondCouleur()"
     class=" flex items-center justify-center min-h-screen">
     <div class="flex flex-col items-center justify-center py-8  ">
+        
     <div v-if="écran==='jeu'" class="flex items-stretch gap-2">
-        <div> 
-            <p> nombre d'erreurs: {{ nombreErreur }} </p>
-        </div>
         <div class="flex flex-col bg-white rounded-2xl shadow items-center justify-center gap-4 min-h-96">
-       <div>
+        <div>
+            <div class="flex items-center justify-center gap-1"> 
+                <span class=" text-blue-950 px-3 py-1 text-sm">erreurs:  </span>
+            </div>
+            <div class="flex items-center justify-center gap-1">
+                <span class="w-4 h-4 rounded-full inline-block border border-blue-950" :class="{ 'bg-red-400': nombreErreur >= 1 }"></span>
+                <span class="w-4 h-4 rounded-full inline-block border border-blue-950" :class="{ 'bg-red-400': nombreErreur >= 2 }"></span>
+                <span class="w-4 h-4 rounded-full inline-block border border-blue-950" :class="{ 'bg-red-400': nombreErreur >= 3 }"></span>
+            </div>
+        </div>
+        <div>
         <button
-        class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28"
+        class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 mx-2 text-sm w-28"
         @click="indice()" >
         indice
         </button>
+        <p class="flex items-center justify-center gap-0">
+            <span class="px-3 py-1 text-xs text-blue-950">indices:{{ nombreIndice }}/3</span>
+        </p>
         </div>
         <div>
         <button
@@ -802,11 +828,14 @@ let nombreErreur= ref(0)
         accueil
         </button>
         </div>
+        <div class="flex flex-col items-center justify-center gap-0">
+            <div class="text-blue-950 px-3 py-1 text-sm">temps: {{ tempsFormaté() }}</div>
+        </div>
     </div>
     <div
     class="bg-white w-110 rounded-3xl shadow-md p-4 flex flex-col items-center justify-center gap-4">
     <div>
-        <h1 class="text-blue-950 text-3xl font-bold mb-4 font-['BagelFatOne']">Binoxxo</h1>
+        <h1 class="text-blue-950 text-4xl font-bold font-['BagelFatOne']">Binoxxo</h1>
     </div> 
 
     <div class="grid gap-1 w-fit" :style="{ gridTemplateColumns: 'repeat(' + tailleDeGrille + ', minmax(0, 1fr))' }">
@@ -839,9 +868,7 @@ let nombreErreur= ref(0)
         :class="{ 'bg-rose-300': mode === 'effacer'}"
         @click="mode='effacer'">Effacer</button>
     </div>
-    <div>
-        <p>temps: {{ tempsFormaté() }}</p>
-     </div>
+
 
 
     <!-- <button 
@@ -858,9 +885,12 @@ let nombreErreur= ref(0)
 
     <div>
         <p v-if="partieGagnee() && résoluParOrdinateur === false" class="text-green-700 text-bold text-xl border-2 border-green-300 bg-green-200 rounded-2xl p-4">Félicitations ! Vous avez gagné ! 🎉</p>
-    </div>
-    <div>
+    
+    
         <p v-if="résoluParOrdinateur === true" class="text-blue-700 text-bold text-xl border-2 border-blue-300 bg-blue-200 rounded-2xl p-4">La grille a été résolue par l'ordinateur ! 🤖</p>
+    
+    
+        <p v-if="partiePerdue()===true" class="text-red-700 text-bold text-xl border-2 border-red-300 bg-red-200 rounded-2xl p-4">Vous avez perdu ! 😢</p>
     </div>
     </div>
     </div>
