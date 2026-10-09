@@ -532,6 +532,66 @@ if (tailleDeGrille.value===6){
 return
 }
 
+function compter0(Ligne){
+    let count = 0
+    for (let C=0 ; C<tailleDeGrille.value ; C=C+1){
+        if (Ligne[C] === 0){
+            count = count + 1
+        }
+    }
+    return count
+}
+
+function compter1(Ligne){
+    let count = 0
+    for (let C=0 ; C<tailleDeGrille.value ; C=C+1){
+        if (Ligne[C] === 1){
+            count = count + 1
+        }
+    }
+    return count
+}
+
+function compterCasesVidesLigne(Ligne){
+    let count = 0
+    for (let C=0 ; C<tailleDeGrille.value ; C=C+1){
+        if (Ligne[C] === null){
+            count = count + 1
+        }
+    }
+    return count
+}
+
+function déduireParExclusion8x8(Ligne){
+    if (tailleDeGrille.value===8){
+        if (Ligne[5]===null && Ligne[6]===null && Ligne[7]===null && Ligne[4]===1 && compter0(Ligne)===3 && compter1(Ligne)===2) {
+            Ligne[7] = 1
+        }
+        if (Ligne[5]===null && Ligne[6]===null && Ligne[7]===null && Ligne[4]===0 && compter0(Ligne)===2 && compter1(Ligne)===3) {
+            Ligne[7] = 0
+        }
+        if (Ligne[0]===null && Ligne[1]===null && Ligne[2]===null && Ligne[3]===1 && compter0(Ligne)===3 && compter1(Ligne)===2) {
+            Ligne[0] = 1
+        }
+        if (Ligne[0]===null && Ligne[1]===null && Ligne[2]===null && Ligne[3]===0 && compter0(Ligne)===2 && compter1(Ligne)===3) {
+            Ligne[0] = 0
+        }
+
+        if (Ligne[3]===1 && Ligne[4]===null && Ligne[5]===null && Ligne[6]===null && compter0(Ligne)===3 && compter1(Ligne)===2 && Ligne[7]===0) {
+            Ligne[6] = 1
+        }
+        if (Ligne[3]===0 && Ligne[4]===null && Ligne[5]===null && Ligne[6]===null && compter0(Ligne)===2 && compter1(Ligne)===3 && Ligne[7]===1) {
+            Ligne[6] = 0
+        }
+        if (Ligne[3]===1 && Ligne[4]===null && Ligne[5]===null && Ligne[6]===null && compter0(Ligne)===2 && compter1(Ligne)===3 && Ligne[7]===0) {
+            Ligne[4] = 0
+        }
+        if (Ligne[3]===0 && Ligne[4]===null && Ligne[5]===null && Ligne[6]===null && compter0(Ligne)===3 && compter1(Ligne)===2 && Ligne[7]===1) {
+            Ligne[4] = 1
+        }
+    }
+}
+
 
 function appliquerColonne(numéro , colonne){
     for (let L=0 ; L<tailleDeGrille.value ; L=L+1){
@@ -546,6 +606,7 @@ function UnePasseDeDéduction(){
         déduireAprèsPaire(grille.value[L])
         déduireAvantPaire(grille.value[L])
         déduireParExclusion(grille.value[L])
+        déduireParExclusion8x8(grille.value[L])
     }
     for (let C=0 ; C<tailleDeGrille.value ; C=C+1){
         const colonne = getColonne(C)
@@ -554,6 +615,7 @@ function UnePasseDeDéduction(){
         déduireAprèsPaire(colonne)
         déduireAvantPaire(colonne)
         déduireParExclusion(colonne)
+        déduireParExclusion8x8(colonne)
         appliquerColonne(C , colonne)
     }
     déduireComparaison()
