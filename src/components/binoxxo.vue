@@ -49,7 +49,7 @@ function afficherLigne(numero: number) {
 
 function afficherColonne(numero: number) {
     const colonne = []
-    for (let L = 0; L < tailleDeGrille.value; L=L+1) {
+    for (let L = 0; L < tailleDeGrille.value; L = L + 1) {
         colonne.push(grille.value[L][numero])
     }
     console.log(colonne)
@@ -57,49 +57,49 @@ function afficherColonne(numero: number) {
 
 function getColonne(numero: number) {
     const colonne = []
-    for (let L = 0; L < tailleDeGrille.value; L=L+1) {
+    for (let L = 0; L < tailleDeGrille.value; L = L + 1) {
         colonne.push(grille.value[L][numero])
     }
     return colonne
 }
 
-function pasdeTriplet(Ligne) { 
-    for (let C = 0 ; C<tailleDeGrille.value-2; C=C+1) {
+function pasdeTriplet(Ligne) {
+    for (let C = 0; C < tailleDeGrille.value - 2; C = C + 1) {
         const a = Ligne[C]
-        const b = Ligne[C+1]
-        const c = Ligne[C+2]
-        if ( a===b && b===c && a !== null) {
+        const b = Ligne[C + 1]
+        const c = Ligne[C + 2]
+        if (a === b && b === c && a !== null) {
             return false
-    }
+        }
     }
     return true
 }
 
 function vérifierGrille() {
-    for (let L=0; L<tailleDeGrille.value ; L=L+1) {
+    for (let L = 0; L < tailleDeGrille.value; L = L + 1) {
         if (pasdeTriplet(grille.value[L]) === false) {
             return false
         }
     }
-    for (let C=0; C<tailleDeGrille.value ; C=C+1) {
+    for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
         if (pasdeTriplet(getColonne(C)) === false) {
             return false
         }
     }
-    for (let L=0; L<tailleDeGrille.value ; L=L+1) {
+    for (let L = 0; L < tailleDeGrille.value; L = L + 1) {
         if (equilibre(grille.value[L]) === false) {
             return false
         }
     }
-    for (let C=0; C<tailleDeGrille.value ; C=C+1) {
+    for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
         if (equilibre(getColonne(C)) === false) {
             return false
         }
     }
-    if(unicitéLignes() === false) {
+    if (unicitéLignes() === false) {
         return false
     }
-    if(unicitéColonnes() === false) {
+    if (unicitéColonnes() === false) {
         return false
     }
     return true
@@ -108,16 +108,16 @@ function vérifierGrille() {
 function equilibre(Ligne) {
     let nb0 = 0
     let nb1 = 0
-    for (let C=0; C<tailleDeGrille.value ; C=C+1) {
+    for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
         if (Ligne[C] === 0) {
             nb0 = nb0 + 1
-            if (nb0 > tailleDeGrille.value/2) {
+            if (nb0 > tailleDeGrille.value / 2) {
                 return false
             }
         }
         if (Ligne[C] === 1) {
             nb1 = nb1 + 1
-            if (nb1 > tailleDeGrille.value/2) {
+            if (nb1 > tailleDeGrille.value / 2) {
                 return false
             }
         }
@@ -125,20 +125,20 @@ function equilibre(Ligne) {
     return true
 }
 
-const mode = ref<null | 0 | 1 | "effacer" >(null)
+const mode = ref<null | 0 | 1 | "effacer">(null)
 
-function caseModifiable(L ,C) {
+function caseModifiable(L, C) {
     if (copieGrilleInitiale[L][C] === null) {
         return true
     }
     return false
 }
 
-function jouerCase(L ,C) {
-    if (partiePerdue() === true){
+function jouerCase(L, C) {
+    if (partiePerdue() === true) {
         return
     }
-    if (caseModifiable(L ,C) === false) {
+    if (caseModifiable(L, C) === false) {
         return
     }
     if (mode.value === "effacer") {
@@ -149,9 +149,9 @@ function jouerCase(L ,C) {
         return
     }
     grille.value[L][C] = mode.value
-    if (grille.value[L][C]!==grilleSolution[L][C]){
-        nombreErreur.value=nombreErreur.value+1
-        if (partiePerdue()===true){
+    if (grille.value[L][C] !== grilleSolution[L][C]) {
+        nombreErreur.value = nombreErreur.value + 1
+        if (partiePerdue() === true) {
             arreterChrono()
         }
     }
@@ -159,12 +159,12 @@ function jouerCase(L ,C) {
     sonClic.play()
     résoluParOrdinateur.value = false
     /*dernierCoup.value = {L ,C}*/
-    if (partieGagnee()===true){
-        sonWin.currentTime =0
+    if (partieGagnee() === true) {
+        sonWin.currentTime = 0
         sonWin.play()
         arreterChrono()
     }
-    if(secondesEcoulées.value===0){
+    if (secondesEcoulées.value === 0) {
         démarrerChrono()
     }
 
@@ -186,8 +186,8 @@ function jouerCase(L ,C) {
 dans le template pour colorer la case du dernier coup si la grille est invalide.
 */
 
-function ligneComplete(Ligne){
-    for (let C = 0 ; C < tailleDeGrille.value ; C=C+1) {
+function ligneComplete(Ligne) {
+    for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
         if (Ligne[C] === null) {
             return false
         }
@@ -195,9 +195,9 @@ function ligneComplete(Ligne){
     return true
 }
 
-function ligneIdentique (Ligne1 , Ligne2) {
-    for (let C=0 ; C < tailleDeGrille.value ; C=C+1) {
-        if (Ligne1[C]!== Ligne2[C]) {
+function ligneIdentique(Ligne1, Ligne2) {
+    for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
+        if (Ligne1[C] !== Ligne2[C]) {
             return false
         }
     }
@@ -205,9 +205,9 @@ function ligneIdentique (Ligne1 , Ligne2) {
 }
 
 function unicitéLignes() {
-    for (let Lx=0 ; Lx < tailleDeGrille.value ; Lx=Lx+1){
-        for (let Ly=Lx+1 ; Ly < tailleDeGrille.value ; Ly=Ly+1){
-            if( ligneComplete(grille.value[Lx]) && ligneComplete(grille.value[Ly]) && ligneIdentique(grille.value[Lx],grille.value[Ly]) ) {
+    for (let Lx = 0; Lx < tailleDeGrille.value; Lx = Lx + 1) {
+        for (let Ly = Lx + 1; Ly < tailleDeGrille.value; Ly = Ly + 1) {
+            if (ligneComplete(grille.value[Lx]) && ligneComplete(grille.value[Ly]) && ligneIdentique(grille.value[Lx], grille.value[Ly])) {
                 return false
             }
         }
@@ -216,9 +216,9 @@ function unicitéLignes() {
 }
 
 function unicitéColonnes() {
-    for (let Cx=0 ; Cx < tailleDeGrille.value ; Cx=Cx+1){
-        for (let Cy=Cx+1 ; Cy < tailleDeGrille.value ; Cy=Cy+1){
-            if( ligneComplete(getColonne(Cx)) && ligneComplete(getColonne(Cy)) && ligneIdentique(getColonne(Cx),getColonne(Cy)) ) {
+    for (let Cx = 0; Cx < tailleDeGrille.value; Cx = Cx + 1) {
+        for (let Cy = Cx + 1; Cy < tailleDeGrille.value; Cy = Cy + 1) {
+            if (ligneComplete(getColonne(Cx)) && ligneComplete(getColonne(Cy)) && ligneIdentique(getColonne(Cx), getColonne(Cy))) {
                 return false
             }
         }
@@ -226,10 +226,10 @@ function unicitéColonnes() {
     return true
 }
 
-function caseEnErreur(L , C) {
+function caseEnErreur(L, C) {
     if (grille.value[L][C] !== null) {
-        if (grilleSolution[L][C] !== grille.value[L][C]) { 
-            return true 
+        if (grilleSolution[L][C] !== grille.value[L][C]) {
+            return true
         }
     }
     /*if(equilibre(grille.value[L]) === false || pasdeTriplet(grille.value[L]) === false || equilibre(getColonne(C)) === false || pasdeTriplet(getColonne(C)) === false) {
@@ -238,26 +238,26 @@ function caseEnErreur(L , C) {
     return false
 }
 
-function resetGrille(){
+function resetGrille() {
     grille.value = JSON.parse(JSON.stringify(copieGrilleInitiale))
     résoluParOrdinateur.value = false
     arreterChrono()
-    secondesEcoulées.value=0
-    nombreIndice.value=0
-    nombreErreur.value=0
+    secondesEcoulées.value = 0
+    nombreIndice.value = 0
+    nombreErreur.value = 0
 }
 
 
 /*création algorithme grille aléatoire*/
 
-function caseSuivante(L ,C) {
-    if (C<tailleDeGrille.value-1){
-        return {L:L ,C:C+1}
+function caseSuivante(L, C) {
+    if (C < tailleDeGrille.value - 1) {
+        return { L: L, C: C + 1 }
     }
-    if (C===tailleDeGrille.value-1 && L<tailleDeGrille.value-1){
-        return {L:L+1 ,C:0}
+    if (C === tailleDeGrille.value - 1 && L < tailleDeGrille.value - 1) {
+        return { L: L + 1, C: 0 }
     }
-    if (L===tailleDeGrille.value-1 && C===tailleDeGrille.value-1){
+    if (L === tailleDeGrille.value - 1 && C === tailleDeGrille.value - 1) {
         return null
     }
 }
@@ -276,11 +276,11 @@ function caseSuivante(L ,C) {
 
 
 
-function grilleVide(){
+function grilleVide() {
     const uneGrilleVide2 = []
-    for (let l=0 ; l<tailleDeGrille.value ; l=l+1){
+    for (let l = 0; l < tailleDeGrille.value; l = l + 1) {
         const uneLigne = []
-        for(let c=0 ; c<tailleDeGrille.value ; c=c+1){
+        for (let c = 0; c < tailleDeGrille.value; c = c + 1) {
             uneLigne.push(null)
         }
         uneGrilleVide2.push(uneLigne)
@@ -288,27 +288,27 @@ function grilleVide(){
     return uneGrilleVide2
 }
 
-function remplirGrille(L ,C) {
+function remplirGrille(L, C) {
     const choix1ou0 = Math.random()
     const premierEssai = choix1ou0 < 0.5 ? 0 : 1
     const deuxiemeEssai = choix1ou0 < 0.5 ? 1 : 0
     grille.value[L][C] = premierEssai
-    if (vérifierGrille()=== true){
-        const nextCase = caseSuivante(L ,C)
+    if (vérifierGrille() === true) {
+        const nextCase = caseSuivante(L, C)
         if (nextCase === null) {
-            return true 
-        }
-        if (remplirGrille(nextCase.L ,nextCase.C) === true) {
             return true
-        } 
-    } 
-    grille.value[L][C] = deuxiemeEssai
-    if (vérifierGrille()=== true){
-        const nextCase = caseSuivante(L ,C)
-        if (nextCase === null) {
-            return true 
         }
-        if (remplirGrille(nextCase.L ,nextCase.C) === true) {
+        if (remplirGrille(nextCase.L, nextCase.C) === true) {
+            return true
+        }
+    }
+    grille.value[L][C] = deuxiemeEssai
+    if (vérifierGrille() === true) {
+        const nextCase = caseSuivante(L, C)
+        if (nextCase === null) {
+            return true
+        }
+        if (remplirGrille(nextCase.L, nextCase.C) === true) {
             return true
         }
     }
@@ -318,54 +318,54 @@ function remplirGrille(L ,C) {
 
 let grilleSolution = JSON.parse(JSON.stringify(grille.value))
 
-function générerGrilleAléatoire(){
+function générerGrilleAléatoire() {
     grille.value = grilleVide()
-    remplirGrille(0 ,0)
+    remplirGrille(0, 0)
     grilleSolution = JSON.parse(JSON.stringify(grille.value))
     cacherPlusieursCases()
     résoluParOrdinateur.value = false
     arreterChrono()
-    secondesEcoulées.value=0
-    nombreIndice.value=0
-    nombreErreur.value=0
+    secondesEcoulées.value = 0
+    nombreIndice.value = 0
+    nombreErreur.value = 0
 }
 
 /*création cases aléatoires à cacher*/
 
 
-function cacherUneCase(){
-    let L = Math.floor(Math.random()*tailleDeGrille.value)
-    let C = Math.floor(Math.random()*tailleDeGrille.value)
+function cacherUneCase() {
+    let L = Math.floor(Math.random() * tailleDeGrille.value)
+    let C = Math.floor(Math.random() * tailleDeGrille.value)
     while (grille.value[L][C] === null) {
-       L = Math.floor(Math.random()*tailleDeGrille.value)
-       C = Math.floor(Math.random()*tailleDeGrille.value)
-       } 
+        L = Math.floor(Math.random() * tailleDeGrille.value)
+        C = Math.floor(Math.random() * tailleDeGrille.value)
+    }
     grille.value[L][C] = null
 }
 
-function cacherPlusieursCases(){
+function cacherPlusieursCases() {
     nombreDeCaseACacher.value = Math.floor(proportionACacher.value / 100 * tailleDeGrille.value * tailleDeGrille.value)
     let tentatives = 0
     let casesCachées = 0
     while (casesCachées < nombreDeCaseACacher.value && tentatives < 200) {
-        let L = Math.floor(Math.random()*tailleDeGrille.value)
-        let C = Math.floor(Math.random()*tailleDeGrille.value)
+        let L = Math.floor(Math.random() * tailleDeGrille.value)
+        let C = Math.floor(Math.random() * tailleDeGrille.value)
         while (grille.value[L][C] === null) {
-            L = Math.floor(Math.random()*tailleDeGrille.value)
-            C = Math.floor(Math.random()*tailleDeGrille.value)
-            }
-        essayerCacherCase(L , C)
+            L = Math.floor(Math.random() * tailleDeGrille.value)
+            C = Math.floor(Math.random() * tailleDeGrille.value)
+        }
+        essayerCacherCase(L, C)
         tentatives = tentatives + 1
         if (grille.value[L][C] === null) {
             casesCachées = casesCachées + 1
+        }
     }
-    }
-     copieGrilleInitiale = JSON.parse(JSON.stringify(grille.value))   /*"à chaque fois qu'on choisit une nouvelle grille au hasard, reprends une nouvelle photo, à jour."*/
+    copieGrilleInitiale = JSON.parse(JSON.stringify(grille.value))   /*"à chaque fois qu'on choisit une nouvelle grille au hasard, reprends une nouvelle photo, à jour."*/
 }
 
 /*estétique*/
 
-function changer10enXO(L,C){
+function changer10enXO(L, C) {
     if (grille.value[L][C] === 0) {
         return 'O'
     }
@@ -379,128 +379,128 @@ function changer10enXO(L,C){
 
 /*solveur logique*/
 
-function déduireParComptage(Ligne){
-    let nb0=0
-    let nb1=0
-    for(let C=0 ; C<tailleDeGrille.value ; C=C+1){
-        if(Ligne[C]===0){
-            nb0=nb0+1
+function déduireParComptage(Ligne) {
+    let nb0 = 0
+    let nb1 = 0
+    for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
+        if (Ligne[C] === 0) {
+            nb0 = nb0 + 1
         }
-        if(Ligne[C]===1){
-            nb1=nb1+1
+        if (Ligne[C] === 1) {
+            nb1 = nb1 + 1
         }
     }
-    if (nb0===tailleDeGrille.value/2){
-        for(let C=0 ; C<tailleDeGrille.value ; C=C+1){
-            if(Ligne[C]===null){
-                Ligne[C]=1
+    if (nb0 === tailleDeGrille.value / 2) {
+        for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
+            if (Ligne[C] === null) {
+                Ligne[C] = 1
             }
         }
     }
-    if (nb1===tailleDeGrille.value/2){
-        for(let C=0 ; C<tailleDeGrille.value ; C=C+1){
-            if(Ligne[C]===null){
-                Ligne[C]=0
+    if (nb1 === tailleDeGrille.value / 2) {
+        for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
+            if (Ligne[C] === null) {
+                Ligne[C] = 0
             }
         }
     }
 }
 
-function valeurOpposée(valeur){
-    if (valeur===0){
+function valeurOpposée(valeur) {
+    if (valeur === 0) {
         return 1
     }
-    if (valeur===1){
+    if (valeur === 1) {
         return 0
     }
 }
 
-function déduireSandwich(Ligne){
-    for(let C=1; C<tailleDeGrille.value-1 ; C=C+1){
-        if (Ligne[C]===null){
-            if(Ligne[C-1]===Ligne[C+1] && Ligne[C-1]!==null){
-                Ligne[C]=valeurOpposée(Ligne[C-1])
+function déduireSandwich(Ligne) {
+    for (let C = 1; C < tailleDeGrille.value - 1; C = C + 1) {
+        if (Ligne[C] === null) {
+            if (Ligne[C - 1] === Ligne[C + 1] && Ligne[C - 1] !== null) {
+                Ligne[C] = valeurOpposée(Ligne[C - 1])
             }
         }
     }
 }
 
-function déduireAprèsPaire(Ligne){
-    for(let C=2; C<tailleDeGrille.value ; C=C+1){
-        if (Ligne[C]===null){
-            if(Ligne[C-1]===Ligne[C-2] && Ligne[C-1]!==null){
-                Ligne[C]=valeurOpposée(Ligne[C-1])
+function déduireAprèsPaire(Ligne) {
+    for (let C = 2; C < tailleDeGrille.value; C = C + 1) {
+        if (Ligne[C] === null) {
+            if (Ligne[C - 1] === Ligne[C - 2] && Ligne[C - 1] !== null) {
+                Ligne[C] = valeurOpposée(Ligne[C - 1])
             }
         }
     }
 }
 
-function déduireAvantPaire(Ligne){
-    for(let C=0; C<tailleDeGrille.value-2 ; C=C+1){
-        if (Ligne[C]===null){
-            if(Ligne[C+1]===Ligne[C+2] && Ligne[C+1]!==null){
-                Ligne[C]=valeurOpposée(Ligne[C+1])
+function déduireAvantPaire(Ligne) {
+    for (let C = 0; C < tailleDeGrille.value - 2; C = C + 1) {
+        if (Ligne[C] === null) {
+            if (Ligne[C + 1] === Ligne[C + 2] && Ligne[C + 1] !== null) {
+                Ligne[C] = valeurOpposée(Ligne[C + 1])
             }
         }
     }
 }
 
-function ligneCompatible(LigneComplète , LigneIncomplète){
-    for (let C=0 ; C<tailleDeGrille.value ; C=C+1){
-        if (LigneIncomplète[C]!==null && LigneComplète[C]!==LigneIncomplète[C]){
+function ligneCompatible(LigneComplète, LigneIncomplète) {
+    for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
+        if (LigneIncomplète[C] !== null && LigneComplète[C] !== LigneIncomplète[C]) {
             return false
         }
     }
-    return true 
-}  
+    return true
+}
 
-function déduireComparaison(){
-    for (let L=0 ; L<tailleDeGrille.value ; L=L+1){
-        let nbnull=0
-        for (let C=0 ; C<tailleDeGrille.value ; C=C+1){
-            if(grille.value[L][C]===null){
-                nbnull=nbnull+1
+function déduireComparaison() {
+    for (let L = 0; L < tailleDeGrille.value; L = L + 1) {
+        let nbnull = 0
+        for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
+            if (grille.value[L][C] === null) {
+                nbnull = nbnull + 1
             }
         }
-        if (nbnull===2){
-            for (let L2=0 ; L2<tailleDeGrille.value ; L2=L2+1){
-            if (ligneComplete(grille.value[L2])===true){
-                if (ligneCompatible(grille.value[L2] , grille.value[L])===true){
-                    for (let C=0 ; C<tailleDeGrille.value ; C=C+1){
-                        if(grille.value[L][C]===null){
-                            grille.value[L][C]=valeurOpposée(grille.value[L2][C])
+        if (nbnull === 2) {
+            for (let L2 = 0; L2 < tailleDeGrille.value; L2 = L2 + 1) {
+                if (ligneComplete(grille.value[L2]) === true) {
+                    if (ligneCompatible(grille.value[L2], grille.value[L]) === true) {
+                        for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
+                            if (grille.value[L][C] === null) {
+                                grille.value[L][C] = valeurOpposée(grille.value[L2][C])
+                            }
                         }
                     }
                 }
             }
-            }
         }
     }
 }
 
-function déduireComparaisonColonnes(){
-    for (let Co=0 ; Co<tailleDeGrille.value ; Co=Co+1){
-        const colonne=getColonne(Co)
-        let nbnull=0
-        for (let C=0 ; C<tailleDeGrille.value ; C=C+1){
-            if(colonne[C]===null){
-                nbnull=nbnull+1
+function déduireComparaisonColonnes() {
+    for (let Co = 0; Co < tailleDeGrille.value; Co = Co + 1) {
+        const colonne = getColonne(Co)
+        let nbnull = 0
+        for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
+            if (colonne[C] === null) {
+                nbnull = nbnull + 1
             }
         }
-        if (nbnull===2){
-            for (let Co2=0 ; Co2<tailleDeGrille.value ; Co2=Co2+1){
-                const colonne2=getColonne(Co2)
-            if (ligneComplete(colonne2)===true){
-                if (ligneCompatible(colonne2 , colonne)===true){
-                    for (let C=0 ; C<tailleDeGrille.value ; C=C+1){
-                        if(colonne[C]===null){
-                            colonne[C]=valeurOpposée(colonne2[C])
+        if (nbnull === 2) {
+            for (let Co2 = 0; Co2 < tailleDeGrille.value; Co2 = Co2 + 1) {
+                const colonne2 = getColonne(Co2)
+                if (ligneComplete(colonne2) === true) {
+                    if (ligneCompatible(colonne2, colonne) === true) {
+                        for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
+                            if (colonne[C] === null) {
+                                colonne[C] = valeurOpposée(colonne2[C])
+                            }
                         }
                     }
                 }
             }
-            }
-            appliquerColonne(Co , colonne)
+            appliquerColonne(Co, colonne)
         }
     }
 }
@@ -510,97 +510,184 @@ function déduireComparaisonColonnes(){
 
 
 
-function déduireParExclusion(Ligne){
-if (tailleDeGrille.value===6){
-    if (Ligne[0]===Ligne[5] && Ligne[0]!==null && Ligne[1]!==null && Ligne[1]!==Ligne[0] && Ligne[2]===null && Ligne[3]===null && Ligne[4]===null){
-        Ligne[4]=valeurOpposée(Ligne[0])
-}
-    if (Ligne[0]===Ligne[5] && Ligne[0]!==null && Ligne[4]!==null && Ligne[4]!==Ligne[0] && Ligne[2]===null && Ligne[3]===null && Ligne[1]===null){
-    Ligne[1]=valeurOpposée(Ligne[5])
-}
-    if (Ligne[0]===Ligne[1] && Ligne[0]!==null && Ligne[2]!==null && Ligne[2]!==Ligne[0] && Ligne[3]===null && Ligne[5]===null && Ligne[4]===null){
-    Ligne[5]=valeurOpposée(Ligne[0])
-}
-    if (Ligne[5]===Ligne[4] && Ligne[5]!==null && Ligne[3]!==null && Ligne[3]!==Ligne[5] && Ligne[0]===null && Ligne[1]===null && Ligne[2]===null){
-    Ligne[0]=valeurOpposée(Ligne[5])
-}
-    if (Ligne[0]===Ligne[5] && Ligne[0]!==null && Ligne[1]===null && Ligne[2]===null && Ligne[3]===null && Ligne[4]===null){
-    Ligne[1]=valeurOpposée(Ligne[0])
-    Ligne[4]=valeurOpposée(Ligne[0])
-}
-}
-return
+function déduireParExclusion(Ligne) {
+    if (tailleDeGrille.value === 6) {
+        if (Ligne[0] === Ligne[5] && Ligne[0] !== null && Ligne[1] !== null && Ligne[1] !== Ligne[0] && Ligne[2] === null && Ligne[3] === null && Ligne[4] === null) {
+            Ligne[4] = valeurOpposée(Ligne[0])
+        }
+        if (Ligne[0] === Ligne[5] && Ligne[0] !== null && Ligne[4] !== null && Ligne[4] !== Ligne[0] && Ligne[2] === null && Ligne[3] === null && Ligne[1] === null) {
+            Ligne[1] = valeurOpposée(Ligne[5])
+        }
+        if (Ligne[0] === Ligne[1] && Ligne[0] !== null && Ligne[2] !== null && Ligne[2] !== Ligne[0] && Ligne[3] === null && Ligne[5] === null && Ligne[4] === null) {
+            Ligne[5] = valeurOpposée(Ligne[0])
+        }
+        if (Ligne[5] === Ligne[4] && Ligne[5] !== null && Ligne[3] !== null && Ligne[3] !== Ligne[5] && Ligne[0] === null && Ligne[1] === null && Ligne[2] === null) {
+            Ligne[0] = valeurOpposée(Ligne[5])
+        }
+        if (Ligne[0] === Ligne[5] && Ligne[0] !== null && Ligne[1] === null && Ligne[2] === null && Ligne[3] === null && Ligne[4] === null) {
+            Ligne[1] = valeurOpposée(Ligne[0])
+            Ligne[4] = valeurOpposée(Ligne[0])
+        }
+    }
+    return
 }
 
-function compter0(Ligne){
+function compter0(Ligne) {
     let count = 0
-    for (let C=0 ; C<tailleDeGrille.value ; C=C+1){
-        if (Ligne[C] === 0){
+    for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
+        if (Ligne[C] === 0) {
             count = count + 1
         }
     }
     return count
 }
 
-function compter1(Ligne){
+function compter1(Ligne) {
     let count = 0
-    for (let C=0 ; C<tailleDeGrille.value ; C=C+1){
-        if (Ligne[C] === 1){
+    for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
+        if (Ligne[C] === 1) {
             count = count + 1
         }
     }
     return count
 }
 
-function compterCasesVidesLigne(Ligne){
+function compterCasesVidesLigne(Ligne) {
     let count = 0
-    for (let C=0 ; C<tailleDeGrille.value ; C=C+1){
-        if (Ligne[C] === null){
+    for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
+        if (Ligne[C] === null) {
             count = count + 1
         }
     }
     return count
 }
 
-function déduireParExclusion8x8(Ligne){
-    if (tailleDeGrille.value===8){
-        if (Ligne[5]===null && Ligne[6]===null && Ligne[7]===null && Ligne[4]===1 && compter0(Ligne)===3 && compter1(Ligne)===2) {
+function déduireParExclusion8x8(Ligne) {
+    if (tailleDeGrille.value === 8) {
+        // trou en 5, 6, 7 ou trou en 0, 1, 2
+        if (Ligne[5] === null && Ligne[6] === null && Ligne[7] === null && Ligne[4] === 1 && compter0(Ligne) === 3 && compter1(Ligne) === 2) {
             Ligne[7] = 1
         }
-        if (Ligne[5]===null && Ligne[6]===null && Ligne[7]===null && Ligne[4]===0 && compter0(Ligne)===2 && compter1(Ligne)===3) {
+        if (Ligne[5] === null && Ligne[6] === null && Ligne[7] === null && Ligne[4] === 0 && compter0(Ligne) === 2 && compter1(Ligne) === 3) {
             Ligne[7] = 0
         }
-        if (Ligne[0]===null && Ligne[1]===null && Ligne[2]===null && Ligne[3]===1 && compter0(Ligne)===3 && compter1(Ligne)===2) {
+        if (Ligne[0] === null && Ligne[1] === null && Ligne[2] === null && Ligne[3] === 1 && compter0(Ligne) === 3 && compter1(Ligne) === 2) {
             Ligne[0] = 1
         }
-        if (Ligne[0]===null && Ligne[1]===null && Ligne[2]===null && Ligne[3]===0 && compter0(Ligne)===2 && compter1(Ligne)===3) {
+        if (Ligne[0] === null && Ligne[1] === null && Ligne[2] === null && Ligne[3] === 0 && compter0(Ligne) === 2 && compter1(Ligne) === 3) {
             Ligne[0] = 0
         }
 
-        if (Ligne[3]===1 && Ligne[4]===null && Ligne[5]===null && Ligne[6]===null && compter0(Ligne)===3 && compter1(Ligne)===2 && Ligne[7]===0) {
+        // trou en 4, 5, 6 (bords Ligne[3] != Ligne[7])
+        if (Ligne[3] === 1 && Ligne[4] === null && Ligne[5] === null && Ligne[6] === null && compter0(Ligne) === 3 && compter1(Ligne) === 2 && Ligne[7] === 0) {
             Ligne[6] = 1
         }
-        if (Ligne[3]===0 && Ligne[4]===null && Ligne[5]===null && Ligne[6]===null && compter0(Ligne)===2 && compter1(Ligne)===3 && Ligne[7]===1) {
+        if (Ligne[3] === 0 && Ligne[4] === null && Ligne[5] === null && Ligne[6] === null && compter0(Ligne) === 2 && compter1(Ligne) === 3 && Ligne[7] === 1) {
             Ligne[6] = 0
         }
-        if (Ligne[3]===1 && Ligne[4]===null && Ligne[5]===null && Ligne[6]===null && compter0(Ligne)===2 && compter1(Ligne)===3 && Ligne[7]===0) {
+        if (Ligne[3] === 1 && Ligne[4] === null && Ligne[5] === null && Ligne[6] === null && compter0(Ligne) === 2 && compter1(Ligne) === 3 && Ligne[7] === 0) {
             Ligne[4] = 0
         }
-        if (Ligne[3]===0 && Ligne[4]===null && Ligne[5]===null && Ligne[6]===null && compter0(Ligne)===3 && compter1(Ligne)===2 && Ligne[7]===1) {
+        if (Ligne[3] === 0 && Ligne[4] === null && Ligne[5] === null && Ligne[6] === null && compter0(Ligne) === 3 && compter1(Ligne) === 2 && Ligne[7] === 1) {
             Ligne[4] = 1
+        }
+
+        // trou en 3, 4, 5 (bords Ligne[2] != Ligne[6])
+        if (Ligne[2] === 1 && Ligne[3] === null && Ligne[4] === null && Ligne[5] === null && compter0(Ligne) === 3 && compter1(Ligne) === 2 && Ligne[6] === 0) {
+            Ligne[5] = 1
+        }
+        if (Ligne[2] === 0 && Ligne[3] === null && Ligne[4] === null && Ligne[5] === null && compter0(Ligne) === 2 && compter1(Ligne) === 3 && Ligne[6] === 1) {
+            Ligne[5] = 0
+        }
+        if (Ligne[2] === 1 && Ligne[3] === null && Ligne[4] === null && Ligne[5] === null && compter0(Ligne) === 2 && compter1(Ligne) === 3 && Ligne[6] === 0) {
+            Ligne[3] = 0
+        }
+        if (Ligne[2] === 0 && Ligne[3] === null && Ligne[4] === null && Ligne[5] === null && compter0(Ligne) === 3 && compter1(Ligne) === 2 && Ligne[6] === 1) {
+            Ligne[3] = 1
+        }
+
+        // trou en 2, 3, 4 (bords Ligne[1] != Ligne[5])
+        if (Ligne[1] === 1 && Ligne[2] === null && Ligne[3] === null && Ligne[4] === null && compter0(Ligne) === 3 && compter1(Ligne) === 2 && Ligne[5] === 0) {
+            Ligne[4] = 1
+        }
+        if (Ligne[1] === 0 && Ligne[2] === null && Ligne[3] === null && Ligne[4] === null && compter0(Ligne) === 2 && compter1(Ligne) === 3 && Ligne[5] === 1) {
+            Ligne[4] = 0
+        }
+        if (Ligne[1] === 1 && Ligne[2] === null && Ligne[3] === null && Ligne[4] === null && compter0(Ligne) === 2 && compter1(Ligne) === 3 && Ligne[5] === 0) {
+            Ligne[2] = 0
+        }
+        if (Ligne[1] === 0 && Ligne[2] === null && Ligne[3] === null && Ligne[4] === null && compter0(Ligne) === 3 && compter1(Ligne) === 2 && Ligne[5] === 1) {
+            Ligne[2] = 1
+        }
+
+        // trou en 1, 2, 3 (bords Ligne[0] != Ligne[4])
+        if (Ligne[0] === 1 && Ligne[1] === null && Ligne[2] === null && Ligne[3] === null && compter0(Ligne) === 3 && compter1(Ligne) === 2 && Ligne[4] === 0) {
+            Ligne[3] = 1
+        }
+        if (Ligne[0] === 0 && Ligne[1] === null && Ligne[2] === null && Ligne[3] === null && compter0(Ligne) === 2 && compter1(Ligne) === 3 && Ligne[4] === 1) {
+            Ligne[3] = 0
+        }
+        if (Ligne[0] === 1 && Ligne[1] === null && Ligne[2] === null && Ligne[3] === null && compter0(Ligne) === 2 && compter1(Ligne) === 3 && Ligne[4] === 0) {
+            Ligne[1] = 0
+        }
+        if (Ligne[0] === 0 && Ligne[1] === null && Ligne[2] === null && Ligne[3] === null && compter0(Ligne) === 3 && compter1(Ligne) === 2 && Ligne[4] === 1) {
+            Ligne[1] = 1
+        }
+
+        // trou en 2, 3, 4 (bords Ligne[1] = Ligne[5])
+        if (Ligne[1] === 1 && Ligne[5] === 1 && Ligne[2] === null && Ligne[3] === null && Ligne[4] === null && compter0(Ligne) === 3 && compter1(Ligne) === 2) {
+            Ligne[2] = 1
+            Ligne[3] = 0
+            Ligne[4] = 1
+        }
+        if (Ligne[1] === 0 && Ligne[5] === 0 && Ligne[2] === null && Ligne[3] === null && Ligne[4] === null && compter0(Ligne) === 2 && compter1(Ligne) === 3) {
+            Ligne[2] = 0
+            Ligne[3] = 1
+            Ligne[4] = 0
+        }
+
+        // trou en 3, 4, 5 (bords Ligne[2] et Ligne[6])
+        if (Ligne[2] === 1 && Ligne[6] === 1 && Ligne[3] === null && Ligne[4] === null && Ligne[5] === null && compter0(Ligne) === 3 && compter1(Ligne) === 2) {
+            Ligne[3] = 1
+            Ligne[4] = 0
+            Ligne[5] = 1
+        }
+        if (Ligne[2] === 0 && Ligne[6] === 0 && Ligne[3] === null && Ligne[4] === null && Ligne[5] === null && compter0(Ligne) === 2 && compter1(Ligne) === 3) {
+            Ligne[3] = 0
+            Ligne[4] = 1
+            Ligne[5] = 0
+        }
+        // ---- trou de 4 collé à la fin (positions 4 à 7), bord Ligne[3] ----
+        if (Ligne[3] === 1 && Ligne[4] === null && Ligne[5] === null && Ligne[6] === null && Ligne[7] === null && compter0(Ligne) === 1 && compter1(Ligne) === 3) {
+            Ligne[4] = 0
+            Ligne[7] = 0
+        }
+        if (Ligne[3] === 0 && Ligne[4] === null && Ligne[5] === null && Ligne[6] === null && Ligne[7] === null && compter0(Ligne) === 3 && compter1(Ligne) === 1) {
+            Ligne[4] = 1
+            Ligne[7] = 1
+        }
+
+        // ---- trou de 4 collé au début (positions 0 à 3), bord Ligne[4] ----
+        if (Ligne[4] === 1 && Ligne[0] === null && Ligne[1] === null && Ligne[2] === null && Ligne[3] === null && compter0(Ligne) === 1 && compter1(Ligne) === 3) {
+            Ligne[0] = 0
+            Ligne[3] = 0
+        }
+        if (Ligne[4] === 0 && Ligne[0] === null && Ligne[1] === null && Ligne[2] === null && Ligne[3] === null && compter0(Ligne) === 3 && compter1(Ligne) === 1) {
+            Ligne[0] = 1
+            Ligne[3] = 1
         }
     }
 }
 
 
-function appliquerColonne(numéro , colonne){
-    for (let L=0 ; L<tailleDeGrille.value ; L=L+1){
-        grille.value[L][numéro]=colonne[L]
+function appliquerColonne(numéro, colonne) {
+    for (let L = 0; L < tailleDeGrille.value; L = L + 1) {
+        grille.value[L][numéro] = colonne[L]
     }
 }
 
-function UnePasseDeDéduction(){
-    for (let L=0 ; L<tailleDeGrille.value ; L=L+1){
+function UnePasseDeDéduction() {
+    for (let L = 0; L < tailleDeGrille.value; L = L + 1) {
         déduireParComptage(grille.value[L])
         déduireSandwich(grille.value[L])
         déduireAprèsPaire(grille.value[L])
@@ -608,7 +695,7 @@ function UnePasseDeDéduction(){
         déduireParExclusion(grille.value[L])
         déduireParExclusion8x8(grille.value[L])
     }
-    for (let C=0 ; C<tailleDeGrille.value ; C=C+1){
+    for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
         const colonne = getColonne(C)
         déduireParComptage(colonne)
         déduireSandwich(colonne)
@@ -616,17 +703,17 @@ function UnePasseDeDéduction(){
         déduireAvantPaire(colonne)
         déduireParExclusion(colonne)
         déduireParExclusion8x8(colonne)
-        appliquerColonne(C , colonne)
+        appliquerColonne(C, colonne)
     }
     déduireComparaison()
     déduireComparaisonColonnes()
 }
 
-function compterCasesVides(){
+function compterCasesVides() {
     let count = 0
-    for (let L=0 ; L<tailleDeGrille.value ; L=L+1){
-        for (let C=0 ; C<tailleDeGrille.value ; C=C+1){
-            if (grille.value[L][C] === null){
+    for (let L = 0; L < tailleDeGrille.value; L = L + 1) {
+        for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
+            if (grille.value[L][C] === null) {
                 count = count + 1
             }
         }
@@ -634,16 +721,16 @@ function compterCasesVides(){
     return count
 }
 
-function solveurLogique(){
-    let casesVidesAvant=compterCasesVides()
-    while (casesVidesAvant>0){
+function solveurLogique() {
+    let casesVidesAvant = compterCasesVides()
+    while (casesVidesAvant > 0) {
         UnePasseDeDéduction()
-        let nouvellesCasesVides=compterCasesVides()
-        if (nouvellesCasesVides===casesVidesAvant){
+        let nouvellesCasesVides = compterCasesVides()
+        if (nouvellesCasesVides === casesVidesAvant) {
             return false
         }
-        casesVidesAvant=nouvellesCasesVides
-        }
+        casesVidesAvant = nouvellesCasesVides
+    }
     return true
 }
 
@@ -663,58 +750,58 @@ function solveurLogique(){
     console.log(grille.value)
 }*/
 
-function essayerCacherCase(L , C){
+function essayerCacherCase(L, C) {
     const copieIndépendanteGrille = JSON.parse(JSON.stringify(grille.value))
     grille.value[L][C] = null
     const résultat = solveurLogique()
     grille.value = copieIndépendanteGrille
-    if (résultat===true){
+    if (résultat === true) {
         grille.value[L][C] = null
     }
 }
 
 /* autres */
 
-function partieGagnee(){
-if (compterCasesVides()===0 && vérifierGrille()===true){
-    return true
-}
-else {
-    return false
-}
+function partieGagnee() {
+    if (compterCasesVides() === 0 && vérifierGrille() === true) {
+        return true
+    }
+    else {
+        return false
+    }
 }
 
 let résoluParOrdinateur = ref(false)
 
-function résoudreClic(){
+function résoudreClic() {
     grille.value = JSON.parse(JSON.stringify(copieGrilleInitiale))
     solveurLogique()
     résoluParOrdinateur.value = true
     arreterChrono()
 }
 
-let afficherRègles= ref(false)
+let afficherRègles = ref(false)
 
-const sonClic = new Audio ("/sons/clic.wav")
+const sonClic = new Audio("/sons/clic.wav")
 
-const sonWin = new Audio ("/sons/victoire.wav")
+const sonWin = new Audio("/sons/victoire.wav")
 
-function indice(){
-    if (nombreIndice.value>=3){
+function indice() {
+    if (nombreIndice.value >= 3) {
         return
     }
     const sauvegarde = JSON.parse(JSON.stringify(grille.value))
     UnePasseDeDéduction()
     const candidats = []
-    for (let L=0 ; L<tailleDeGrille.value ; L=L+1){
-        for (let C=0 ; C<tailleDeGrille.value ; C=C+1){
-            if (sauvegarde[L][C]===null && grille.value[L][C]!==null) {
-                candidats.push({L, C})
+    for (let L = 0; L < tailleDeGrille.value; L = L + 1) {
+        for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
+            if (sauvegarde[L][C] === null && grille.value[L][C] !== null) {
+                candidats.push({ L, C })
             }
         }
     }
     const choixAléatoireCandidat = Math.floor(Math.random() * candidats.length)
-    const caseChoisie =candidats[choixAléatoireCandidat]
+    const caseChoisie = candidats[choixAléatoireCandidat]
     const valeurTrouvée = grille.value[caseChoisie.L][caseChoisie.C]
     grille.value = sauvegarde
     grille.value[caseChoisie.L][caseChoisie.C] = valeurTrouvée
@@ -723,31 +810,31 @@ function indice(){
 
 const secondesEcoulées = ref(0)
 
-let idChrono = null 
+let idChrono = null
 
-function démarrerChrono (){
+function démarrerChrono() {
     clearInterval(idChrono)
     secondesEcoulées.value = 0
-    idChrono = setInterval(()=>{secondesEcoulées.value = secondesEcoulées.value+1},1000)
+    idChrono = setInterval(() => { secondesEcoulées.value = secondesEcoulées.value + 1 }, 1000)
 }
 
-function arreterChrono(){
+function arreterChrono() {
     clearInterval(idChrono)
 }
 
-function tempsFormaté () {
-    let minute= Math.floor(secondesEcoulées.value / 60)
-    let seconde= secondesEcoulées.value % 60
-    let temps= minute + ":" + seconde 
-    if (seconde<10){
-        temps= minute + ":0" + seconde
+function tempsFormaté() {
+    let minute = Math.floor(secondesEcoulées.value / 60)
+    let seconde = secondesEcoulées.value % 60
+    let temps = minute + ":" + seconde
+    if (seconde < 10) {
+        temps = minute + ":0" + seconde
     }
     return temps
 }
 
-/* page d'accueil */ 
+/* page d'accueil */
 
-const écran=ref("accueil")
+const écran = ref("accueil")
 
 /*const afficherChoixDifficulté = ref(false)*/
 
@@ -755,23 +842,23 @@ const nombreDeCaseACacher = ref(20)
 
 /*écriture plusieurs tailles de grilles */
 
-const tailleDeGrille = ref < null | 4 | 6 | 8 >(null)
+const tailleDeGrille = ref<null | 4 | 6 | 8>(null)
 
-const afficherChoixTaille = ref (false)
+const afficherChoixTaille = ref(false)
 
-const proportionACacher = ref <null | 30 | 50 |70 >(null)
+const proportionACacher = ref<null | 30 | 50 | 70>(null)
 
-function vérifierJouabilité (){
-    if (proportionACacher.value!==null && tailleDeGrille.value!== null){
+function vérifierJouabilité() {
+    if (proportionACacher.value !== null && tailleDeGrille.value !== null) {
         return true
     }
     return false
 }
 
-function commencerPartie(){
-    aTenterDeJouer.value=true
-    if(vérifierJouabilité()=== true){
-        écran.value="jeu"
+function commencerPartie() {
+    aTenterDeJouer.value = true
+    if (vérifierJouabilité() === true) {
+        écran.value = "jeu"
         générerGrilleAléatoire()
     }
 }
@@ -791,29 +878,29 @@ function commencerPartie(){
     }
 }*/
 
-function fondCouleur (){
-    if (écran.value==="accueil"){
+function fondCouleur() {
+    if (écran.value === "accueil") {
         return 'bg-sky-100'
     }
-    if (tailleDeGrille.value===4){
+    if (tailleDeGrille.value === 4) {
         return 'bg-green-100'
     }
-    if (tailleDeGrille.value===6){
+    if (tailleDeGrille.value === 6) {
         return 'bg-yellow-100'
     }
-    if (tailleDeGrille.value===8){
+    if (tailleDeGrille.value === 8) {
         return 'bg-rose-100'
     }
 }
 
-function messageErreur(){
-    if (tailleDeGrille.value===null && proportionACacher.value===null){
+function messageErreur() {
+    if (tailleDeGrille.value === null && proportionACacher.value === null) {
         return "Veuillez choisir la taille et le niveau de la grille."
     }
-    if (tailleDeGrille.value===null){
+    if (tailleDeGrille.value === null) {
         return "Veuillez choisir la taille de la grille."
     }
-    if (proportionACacher.value===null){
+    if (proportionACacher.value === null) {
         return "Veuillez choisir le niveau de la grille."
     }
 
@@ -822,12 +909,12 @@ function messageErreur(){
 
 const aTenterDeJouer = ref(false)
 
-let nombreIndice= ref(0)
+let nombreIndice = ref(0)
 
-let nombreErreur= ref(0)
+let nombreErreur = ref(0)
 
-function partiePerdue(){
-    if (nombreErreur.value>=3){
+function partiePerdue() {
+    if (nombreErreur.value >= 3) {
         return true
     }
     return false
@@ -836,207 +923,216 @@ function partiePerdue(){
 </script>
 
 <template>
-    <div :class="fondCouleur()"
-    class=" flex items-center justify-center min-h-screen">
-    <div class="flex flex-col items-center justify-center py-8  ">
-        
-    <div v-if="écran==='jeu'" class="flex items-stretch gap-2">
-        <div class="flex flex-col bg-white rounded-2xl shadow items-center justify-center gap-4 min-h-96">
-        <div>
-            <div class="flex items-center justify-center gap-1"> 
-                <span class=" text-blue-950 px-3 py-1 text-sm">erreurs:  </span>
-            </div>
-            <div class="flex items-center justify-center gap-1">
-                <span class="w-4 h-4 rounded-full inline-block border border-blue-950" :class="{ 'bg-red-400': nombreErreur >= 1 }"></span>
-                <span class="w-4 h-4 rounded-full inline-block border border-blue-950" :class="{ 'bg-red-400': nombreErreur >= 2 }"></span>
-                <span class="w-4 h-4 rounded-full inline-block border border-blue-950" :class="{ 'bg-red-400': nombreErreur >= 3 }"></span>
-            </div>
-        </div>
-        <div>
-        <button
-        class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 mx-2 text-sm w-28"
-        @click="indice()" >
-        indice
-        </button>
-        <p class="flex items-center justify-center gap-0">
-            <span class="px-3 py-1 text-xs text-blue-950">indices:{{ nombreIndice }}/3</span>
-        </p>
-        </div>
-        <div>
-        <button
-        class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28"
-        @click="résoudreClic()">
-        résoudre
-        </button>
-        </div>
-        <div>
-        <button
-        class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28"
-        @click="resetGrille()">
-        recommencer
-        </button>
-        </div>
-        <div>
-        <button
-        class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28 whitespace-nowrap"
-        @click="générerGrilleAléatoire()">
-        grille aléatoire
-        </button>
-        </div>
-        <div>
-        <button
-        class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28 whitespace-nowrap"
-        @click="écran='accueil'">
-        accueil
-        </button>
-        </div>
-        <div class="flex flex-col items-center justify-center gap-0">
-            <div class="text-blue-950 px-3 py-1 text-sm">temps: {{ tempsFormaté() }}</div>
-        </div>
-    </div>
-    <div
-    class="bg-white w-110 rounded-3xl shadow-md p-4 flex flex-col items-center justify-center gap-4">
-    <div>
-        <h1 class="text-blue-950 text-4xl font-bold font-['BagelFatOne']">Binoxxo</h1>
-    </div> 
+    <div :class="fondCouleur()" class=" flex items-center justify-center min-h-screen">
+        <div class="flex flex-col items-center justify-center py-8  ">
 
-    <div class="grid gap-1 w-fit" :style="{ gridTemplateColumns: 'repeat(' + tailleDeGrille + ', minmax(0, 1fr))' }">
-        <template v-for="(Ligne, L) in grille" :key="L" >
-            <div v-for="(Case, C) in Ligne" :key="C" 
-                class="w-10 h-10 border border-gray-300 text-center rounded-lg center flex items-center justify-center cursor-pointer text-lg "
-                :class="{ 'bg-red-400': caseEnErreur(L, C), 'bg-amber-200': Ligne[C] === 0 && caseModifiable(L,C)===false && caseEnErreur(L,C)===false, 'bg-teal-200': Ligne[C] === 1 && caseModifiable(L,C)===false && caseEnErreur(L,C)===false,'bg-gray-100': caseModifiable(L,C)===true && caseEnErreur(L,C)===false}"
-                @click= "jouerCase(L , C)">
-                {{ changer10enXO(L,C)}}
-            </div>
-        </template>
-    </div>
-    <div>
-        <p class="px-3 py-1 rounded-full text-sm mt-2"
-        :class="{ 'bg-green-200 text-green-800': vérifierGrille() === true, 'bg-red-200 text-red-800': vérifierGrille() === false }"
-        >
-        Grille: {{ vérifierGrille() ? 'Valide' : 'Invalide' }}</p>
-    </div>
-    <div>
-        <button 
-        class="bg-rose-200 border-1 border-pink-300 rounded-2xl text-white p-2 mx-2 hover:bg-rose-300 "
-        :class="{ 'bg-rose-300': mode === 0 }"
-        @click="mode=0">Mode O</button>
-        <button 
-        class="bg-rose-200 border-1 border-pink-300 rounded-2xl text-white p-2 mx-2 hover:bg-rose-300 "
-        :class="{ 'bg-rose-300': mode === 1 }"
-        @click="mode=1">Mode X</button>
-        <button 
-        class="bg-rose-200 border-1 border-pink-300 rounded-2xl text-white p-2 mx-2 hover:bg-rose-300 "
-        :class="{ 'bg-rose-300': mode === 'effacer'}"
-        @click="mode='effacer'">Effacer</button>
-    </div>
+            <div v-if="écran === 'jeu'" class="flex items-stretch gap-2">
+                <div class="flex flex-col bg-white rounded-2xl shadow items-center justify-center gap-4 min-h-96">
+                    <div>
+                        <div class="flex items-center justify-center gap-1">
+                            <span class=" text-blue-950 px-3 py-1 text-sm">erreurs: </span>
+                        </div>
+                        <div class="flex items-center justify-center gap-1">
+                            <span class="w-4 h-4 rounded-full inline-block border border-blue-950"
+                                :class="{ 'bg-red-400': nombreErreur >= 1 }"></span>
+                            <span class="w-4 h-4 rounded-full inline-block border border-blue-950"
+                                :class="{ 'bg-red-400': nombreErreur >= 2 }"></span>
+                            <span class="w-4 h-4 rounded-full inline-block border border-blue-950"
+                                :class="{ 'bg-red-400': nombreErreur >= 3 }"></span>
+                        </div>
+                    </div>
+                    <div>
+                        <button
+                            class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 mx-2 text-sm w-28"
+                            @click="indice()">
+                            indice
+                        </button>
+                        <p class="flex items-center justify-center gap-0">
+                            <span class="px-3 py-1 text-xs text-blue-950">indices:{{ nombreIndice }}/3</span>
+                        </p>
+                    </div>
+                    <div>
+                        <button
+                            class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28"
+                            @click="résoudreClic()">
+                            résoudre
+                        </button>
+                    </div>
+                    <div>
+                        <button
+                            class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28"
+                            @click="resetGrille()">
+                            recommencer
+                        </button>
+                    </div>
+                    <div>
+                        <button
+                            class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28 whitespace-nowrap"
+                            @click="générerGrilleAléatoire()">
+                            grille aléatoire
+                        </button>
+                    </div>
+                    <div>
+                        <button
+                            class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28 whitespace-nowrap"
+                            @click="écran = 'accueil'">
+                            accueil
+                        </button>
+                    </div>
+                    <div class="flex flex-col items-center justify-center gap-0">
+                        <div class="text-blue-950 px-3 py-1 text-sm">temps: {{ tempsFormaté() }}</div>
+                    </div>
+                </div>
+                <div class="bg-white w-110 rounded-3xl shadow-md p-4 flex flex-col items-center justify-center gap-4">
+                    <div>
+                        <h1 class="text-blue-950 text-4xl font-bold font-['BagelFatOne']">Binoxxo</h1>
+                    </div>
+
+                    <div class="grid gap-1 w-fit"
+                        :style="{ gridTemplateColumns: 'repeat(' + tailleDeGrille + ', minmax(0, 1fr))' }">
+                        <template v-for="(Ligne, L) in grille" :key="L">
+                            <div v-for="(Case, C) in Ligne" :key="C"
+                                class="w-10 h-10 border border-gray-300 text-center rounded-lg center flex items-center justify-center cursor-pointer text-lg "
+                                :class="{ 'bg-red-400': caseEnErreur(L, C), 'bg-amber-200': Ligne[C] === 0 && caseModifiable(L, C) === false && caseEnErreur(L, C) === false, 'bg-teal-200': Ligne[C] === 1 && caseModifiable(L, C) === false && caseEnErreur(L, C) === false, 'bg-gray-100': caseModifiable(L, C) === true && caseEnErreur(L, C) === false }"
+                                @click="jouerCase(L, C)">
+                                {{ changer10enXO(L, C) }}
+                            </div>
+                        </template>
+                    </div>
+                    <div>
+                        <p class="px-3 py-1 rounded-full text-sm mt-2"
+                            :class="{ 'bg-green-200 text-green-800': vérifierGrille() === true, 'bg-red-200 text-red-800': vérifierGrille() === false }">
+                            Grille: {{ vérifierGrille() ? 'Valide' : 'Invalide' }}</p>
+                    </div>
+                    <div>
+                        <button
+                            class="bg-rose-200 border-1 border-pink-300 rounded-2xl text-white p-2 mx-2 hover:bg-rose-300 "
+                            :class="{ 'bg-rose-300': mode === 0 }" @click="mode = 0">Mode O</button>
+                        <button
+                            class="bg-rose-200 border-1 border-pink-300 rounded-2xl text-white p-2 mx-2 hover:bg-rose-300 "
+                            :class="{ 'bg-rose-300': mode === 1 }" @click="mode = 1">Mode X</button>
+                        <button
+                            class="bg-rose-200 border-1 border-pink-300 rounded-2xl text-white p-2 mx-2 hover:bg-rose-300 "
+                            :class="{ 'bg-rose-300': mode === 'effacer' }" @click="mode = 'effacer'">Effacer</button>
+                    </div>
 
 
 
-    <!-- <button 
+                    <!-- <button 
         class="bg-green-300 hover:bg-green-400 rounded-2xl p-2 mx-2"
         @click="choisirGrille()">
         nouvelle grille
     </button> -->
 
-        <!-- <button
+                    <!-- <button
         class="bg-pink-300 hover:bg-pink-400 rounded-2xl p-2 mx-2"
         @click="testerSolveurLogique()">
         tester le solveur logique
         </button> -->
 
-    <div>
-        <p v-if="partieGagnee() && résoluParOrdinateur === false" class="text-green-700 text-bold text-xl border-2 border-green-300 bg-green-200 rounded-2xl p-4">Félicitations ! Vous avez gagné ! 🎉</p>
-    
-    
-        <p v-if="résoluParOrdinateur === true" class="text-blue-700 text-bold text-xl border-2 border-blue-300 bg-blue-200 rounded-2xl p-4">La grille a été résolue par l'ordinateur ! 🤖</p>
-    
-    
-        <p v-if="partiePerdue()===true" class="text-red-700 text-bold text-xl border-2 border-red-300 bg-red-200 rounded-2xl p-4">Vous avez perdu ! 😢</p>
-    </div>
-    </div>
-    </div>
-<div v-if="écran==='accueil'" class="flex flex-col items-center gap-2">
-    <div class="bg-white rounded-3xl shadow-md p-4 flex flex-col items-center gap-4 w-110 min-h-86 ">
-        <h1 class="text-blue-950 text-6xl font-['BagelFatOne']">Binoxxo</h1>
-        <!--<button @click="afficherChoixDifficulté=true" 
+                    <div>
+                        <p v-if="partieGagnee() && résoluParOrdinateur === false"
+                            class="text-green-700 text-bold text-xl border-2 border-green-300 bg-green-200 rounded-2xl p-4">
+                            Félicitations !
+                            Vous avez gagné ! 🎉</p>
+
+
+                        <p v-if="résoluParOrdinateur === true"
+                            class="text-blue-700 text-bold text-xl border-2 border-blue-300 bg-blue-200 rounded-2xl p-4">
+                            La grille a été
+                            résolue par l'ordinateur ! 🤖</p>
+
+
+                        <p v-if="partiePerdue() === true"
+                            class="text-red-700 text-bold text-xl border-2 border-red-300 bg-red-200 rounded-2xl p-4">
+                            Vous avez perdu ! 😢
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div v-if="écran === 'accueil'" class="flex flex-col items-center gap-2">
+                <div class="bg-white rounded-3xl shadow-md p-4 flex flex-col items-center gap-4 w-110 min-h-86 ">
+                    <h1 class="text-blue-950 text-6xl font-['BagelFatOne']">Binoxxo</h1>
+                    <!--<button @click="afficherChoixDifficulté=true" 
         class="bg-teal-200 border-1 border-teal-300 rounded-full hover:bg-teal-300 p-2 text-3xl">
             ▶︎
         </button> -->
-        <div class="flex flex-col items-center">
-            <button @click="afficherRègles= !afficherRègles"
-            class="text-xs text-gray-500 gap-y-2 bg-gray-200 rounded-2xl border-1 border-gray-300 w-15 h-5 m-1">
-            Règles
-            </button>
-            <p v-if="afficherRègles" class="text-xs text-gray-500 m-1 text-center">
-            · pas plus de 2 symboles identiques à la suite <br>
-            · autant de X que de O par ligne/colonne <br>
-            · deux lignes ou deux colonnes ne peuvent pas être identiques.
-            </p>
-        </div>
-        <div>
-            <p class="text-blue-950">
-                Choisissez la taille de votre grille :
-            </p>
-        </div>
-        <div>
-            <button class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
-            @click="tailleDeGrille=4"
-            :class="{ 'bg-orange-300 shadow': tailleDeGrille === 4 }">
-                4x4
-            </button>
-            <button class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
-            @click="tailleDeGrille=6"
-            :class="{ 'bg-orange-300 shadow': tailleDeGrille === 6 }">
-                6x6
-            </button>
-            <button class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
-            @click="tailleDeGrille=8"
-            :class="{ 'bg-orange-300 shadow': tailleDeGrille === 8 }">
-                8x8
-            </button>
-        </div>
-        <div>
-            <p class="text-blue-950">
-                Choisissez le niveau de difficulté :
-            </p>
-        </div>
-        <div>
-            <button class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
-            @click="proportionACacher=30"
-            :class="{ 'bg-orange-300 shadow': proportionACacher === 30 }">
-                facile
-            </button>
-            <button class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
-            @click="proportionACacher=50"
-            :class="{ 'bg-orange-300 shadow': proportionACacher === 50 }">
-                moyen
-            </button>
-            <button class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
-            @click="proportionACacher=70"
-            :class="{ 'bg-orange-300 shadow': proportionACacher === 70 }">
-                difficile
-            </button>
-        </div>
+                    <div class="flex flex-col items-center">
+                        <button @click="afficherRègles = !afficherRègles"
+                            class="text-xs text-gray-500 gap-y-2 bg-gray-200 rounded-2xl border-1 border-gray-300 w-15 h-5 m-1">
+                            Règles
+                        </button>
+                        <p v-if="afficherRègles" class="text-xs text-gray-500 m-1 text-center">
+                            · pas plus de 2 symboles identiques à la suite <br>
+                            · autant de X que de O par ligne/colonne <br>
+                            · deux lignes ou deux colonnes ne peuvent pas être identiques.
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-blue-950">
+                            Choisissez la taille de votre grille :
+                        </p>
+                    </div>
+                    <div>
+                        <button
+                            class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
+                            @click="tailleDeGrille = 4" :class="{ 'bg-orange-300 shadow': tailleDeGrille === 4 }">
+                            4x4
+                        </button>
+                        <button
+                            class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
+                            @click="tailleDeGrille = 6" :class="{ 'bg-orange-300 shadow': tailleDeGrille === 6 }">
+                            6x6
+                        </button>
+                        <button
+                            class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
+                            @click="tailleDeGrille = 8" :class="{ 'bg-orange-300 shadow': tailleDeGrille === 8 }">
+                            8x8
+                        </button>
+                    </div>
+                    <div>
+                        <p class="text-blue-950">
+                            Choisissez le niveau de difficulté :
+                        </p>
+                    </div>
+                    <div>
+                        <button
+                            class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
+                            @click="proportionACacher = 30"
+                            :class="{ 'bg-orange-300 shadow': proportionACacher === 30 }">
+                            facile
+                        </button>
+                        <button
+                            class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
+                            @click="proportionACacher = 50"
+                            :class="{ 'bg-orange-300 shadow': proportionACacher === 50 }">
+                            moyen
+                        </button>
+                        <button
+                            class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
+                            @click="proportionACacher = 70"
+                            :class="{ 'bg-orange-300 shadow': proportionACacher === 70 }">
+                            difficile
+                        </button>
+                    </div>
 
-        
+
+                </div>
+                <div class="bg-white rounded-3xl shadow-md p-4 flex flex-col items-center gap-2 w-110 ">
+                    <p v-if="aTenterDeJouer === true && messageErreur() !== ''" class="text-blue-950 text-sm">
+                        {{ messageErreur() }}
+                    </p>
+                    <div>
+                        <button @click="commencerPartie()"
+                            class="bg-blue-200 border-1 border-blue-300 rounded-2xl hover:bg-blue-300 p-2 mx-2 w-68 text-lg">
+                            jouer
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
     </div>
-    <div class="bg-white rounded-3xl shadow-md p-4 flex flex-col items-center gap-2 w-110 ">
-        <p v-if="aTenterDeJouer===true && messageErreur()!==''" class="text-blue-950 text-sm">
-            {{ messageErreur() }}
-        </p>
-        <div>
-            <button @click="commencerPartie()"
-            class="bg-blue-200 border-1 border-blue-300 rounded-2xl hover:bg-blue-300 p-2 mx-2 w-68 text-lg">
-                jouer 
-            </button>
-        </div>
-
-    </div>
-</div>  
-
-
-    </div>
-    </div>
-</template> 
-
+</template>

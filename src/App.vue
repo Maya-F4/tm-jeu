@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import Binoxxo from './components/binoxxo.vue';
+import binoxxo from './components/binoxxo.vue';
+
 
 </script>
 
 <template>
-  
+  <binoxxo />
 
-<binoxxo />
+
 
 </template>
 

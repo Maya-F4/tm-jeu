@@ -145,7 +145,7 @@ function plateauAleatoire() {
             @click="reset()" >Plateau initial</button>
 
             <button 
-            class="w-34 h-16 rounded-2xl p-4 text-stone-600 mt-4 text-center bg-green-100 border border-green-200" 
+            class="w-34 h-16 rounded-2xl p-4 text-stone-600 mt-4 flex items-center justify-center bg-green-100 border border-green-200" 
             @click="plateauAleatoire()" >Plateau aléatoire</button>
         </div>
 
