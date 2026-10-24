@@ -555,3 +555,9 @@
 - Rendre le jeu jouable sur tout type d'écran (responsive), puis explorer la transformation en application (PWA, puis Capacitor si souhaité).
 - Projet perso en continu : résoudre des grilles 8×8/4×4 à la main pour trouver de nouvelles techniques de déduction.
 - Mis de côté volontairement, à reprendre seulement si l'envie revient : indice "le plus stratégique" (débloquant le plus de cases), affichage de la technique utilisée par chaque indice.
+
+## 2026-10-24 — À faire (notes)
+
+- Modifier le badge "Grille : Valide/Invalide" pour qu'il soit cohérent avec les cases rouges : il ne vérifie que les règles, alors que les cases rouges viennent de la comparaison avec la solution.
+- Une fois la partie gagnée ou résolue par l'ordinateur, bloquer la grille : on ne doit plus pouvoir la modifier.
+- Toujours en attente : responsive, puis transformation en application (PWA).

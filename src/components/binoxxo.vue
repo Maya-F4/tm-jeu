@@ -138,6 +138,9 @@ function jouerCase(L, C) {
     if (partiePerdue() === true) {
         return
     }
+    if (partieRésolue() === true) {
+        return
+    }
     if (caseModifiable(L, C) === false) {
         return
     }
@@ -774,6 +777,12 @@ function partieGagnee() {
 let résoluParOrdinateur = ref(false)
 
 function résoudreClic() {
+    if (partiePerdue() === true) {
+        return
+    }
+    if (partieRésolue() === true) {
+        return
+    }
     grille.value = JSON.parse(JSON.stringify(copieGrilleInitiale))
     solveurLogique()
     résoluParOrdinateur.value = true
@@ -787,6 +796,12 @@ const sonClic = new Audio("/sons/clic.wav")
 const sonWin = new Audio("/sons/victoire.wav")
 
 function indice() {
+    if (partiePerdue() === true) {
+        return
+    }
+    if (partieRésolue() === true) {
+        return
+    }
     if (nombreIndice.value >= 3) {
         return
     }
@@ -800,12 +815,23 @@ function indice() {
             }
         }
     }
+    if (candidats.length === 0) {
+        return
+    }
     const choixAléatoireCandidat = Math.floor(Math.random() * candidats.length)
     const caseChoisie = candidats[choixAléatoireCandidat]
     const valeurTrouvée = grille.value[caseChoisie.L][caseChoisie.C]
     grille.value = sauvegarde
     grille.value[caseChoisie.L][caseChoisie.C] = valeurTrouvée
     nombreIndice.value = nombreIndice.value + 1
+    if (partieGagnee() === true) {
+        sonWin.currentTime = 0
+        sonWin.play()
+        arreterChrono()
+    }
+    if (secondesEcoulées.value === 0) {
+        démarrerChrono()
+    }
 }
 
 const secondesEcoulées = ref(0)
@@ -844,7 +870,7 @@ const nombreDeCaseACacher = ref(20)
 
 const tailleDeGrille = ref<null | 4 | 6 | 8>(null)
 
-const afficherChoixTaille = ref(false)
+
 
 const proportionACacher = ref<null | 30 | 50 | 70>(null)
 
@@ -920,6 +946,29 @@ function partiePerdue() {
     return false
 }
 
+function partieRésolue() {
+    if (résoluParOrdinateur.value === true) {
+        return true
+    }
+    if (partieGagnee() === true) {
+        return true
+    }
+    return false
+}
+
+function grilleCorrecte() {
+    for (let L = 0; L < tailleDeGrille.value; L = L + 1) {
+        for (let C = 0; C < tailleDeGrille.value; C = C + 1) {
+            if (caseEnErreur(L, C) === true) {
+                return false
+            }
+        }
+    }
+    return true
+}
+
+
+
 </script>
 
 <template>
@@ -930,7 +979,7 @@ function partiePerdue() {
                 <div class="flex flex-col bg-white rounded-2xl shadow items-center justify-center gap-4 min-h-96">
                     <div>
                         <div class="flex items-center justify-center gap-1">
-                            <span class=" text-blue-950 px-3 py-1 text-sm">erreurs: </span>
+                            <span class=" text-blue-950 px-3 py-1 text-sm">Erreurs: </span>
                         </div>
                         <div class="flex items-center justify-center gap-1">
                             <span class="w-4 h-4 rounded-full inline-block border border-blue-950"
@@ -945,42 +994,42 @@ function partiePerdue() {
                         <button
                             class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 mx-2 text-sm w-28"
                             @click="indice()">
-                            indice
+                            Indice
                         </button>
                         <p class="flex items-center justify-center gap-0">
-                            <span class="px-3 py-1 text-xs text-blue-950">indices:{{ nombreIndice }}/3</span>
+                            <span class="px-3 py-1 text-xs text-blue-950">Indices:{{ nombreIndice }}/3</span>
                         </p>
                     </div>
                     <div>
                         <button
                             class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28"
                             @click="résoudreClic()">
-                            résoudre
+                            Résoudre
                         </button>
                     </div>
                     <div>
                         <button
                             class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28"
                             @click="resetGrille()">
-                            recommencer
+                            Recommencer
                         </button>
                     </div>
                     <div>
                         <button
                             class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28 whitespace-nowrap"
                             @click="générerGrilleAléatoire()">
-                            grille aléatoire
+                            Grille aléatoire
                         </button>
                     </div>
                     <div>
                         <button
                             class="bg-sky-200 hover:bg-sky-300 border-1 border-sky-300 rounded-2xl p-2 m-2 text-sm w-28 whitespace-nowrap"
                             @click="écran = 'accueil'">
-                            accueil
+                            Accueil
                         </button>
                     </div>
                     <div class="flex flex-col items-center justify-center gap-0">
-                        <div class="text-blue-950 px-3 py-1 text-sm">temps: {{ tempsFormaté() }}</div>
+                        <div class="text-blue-950 px-3 py-1 text-sm">Temps: {{ tempsFormaté() }}</div>
                     </div>
                 </div>
                 <div class="bg-white w-110 rounded-3xl shadow-md p-4 flex flex-col items-center justify-center gap-4">
@@ -1001,8 +1050,8 @@ function partiePerdue() {
                     </div>
                     <div>
                         <p class="px-3 py-1 rounded-full text-sm mt-2"
-                            :class="{ 'bg-green-200 text-green-800': vérifierGrille() === true, 'bg-red-200 text-red-800': vérifierGrille() === false }">
-                            Grille: {{ vérifierGrille() ? 'Valide' : 'Invalide' }}</p>
+                            :class="{ 'bg-green-200 text-green-800': grilleCorrecte() === true, 'bg-red-200 text-red-800': grilleCorrecte() === false }">
+                            Grille : {{ grilleCorrecte() ? 'valide' : 'invalide' }}</p>
                     </div>
                     <div>
                         <button
@@ -1059,12 +1108,12 @@ function partiePerdue() {
         </button> -->
                     <div class="flex flex-col items-center">
                         <button @click="afficherRègles = !afficherRègles"
-                            class="text-xs text-gray-500 gap-y-2 bg-gray-200 rounded-2xl border-1 border-gray-300 w-15 h-5 m-1">
+                            class="text-xs text-gray-500 gap-y-2 bg-gray-200 rounded-2xl border-1 border-gray-300 w-15 h-5 m-1 hover:bg-gray-300 hover:text-gray-600">
                             Règles
                         </button>
                         <p v-if="afficherRègles" class="text-xs text-gray-500 m-1 text-center">
-                            · pas plus de 2 symboles identiques à la suite <br>
-                            · autant de X que de O par ligne/colonne <br>
+                            · pas plus de deux symboles identiques à la suite <br>
+                            · autant de X que de O par ligne et par colonne <br>
                             · deux lignes ou deux colonnes ne peuvent pas être identiques.
                         </p>
                     </div>
@@ -1100,19 +1149,19 @@ function partiePerdue() {
                             class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
                             @click="proportionACacher = 30"
                             :class="{ 'bg-orange-300 shadow': proportionACacher === 30 }">
-                            facile
+                            Facile
                         </button>
                         <button
                             class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
                             @click="proportionACacher = 50"
                             :class="{ 'bg-orange-300 shadow': proportionACacher === 50 }">
-                            moyen
+                            Moyen
                         </button>
                         <button
                             class="bg-orange-200 border-1 border-orange-300 rounded-2xl hover:bg-orange-300 p-2 mx-2 w-20"
                             @click="proportionACacher = 70"
                             :class="{ 'bg-orange-300 shadow': proportionACacher === 70 }">
-                            difficile
+                            Difficile
                         </button>
                     </div>
 
@@ -1125,7 +1174,7 @@ function partiePerdue() {
                     <div>
                         <button @click="commencerPartie()"
                             class="bg-blue-200 border-1 border-blue-300 rounded-2xl hover:bg-blue-300 p-2 mx-2 w-68 text-lg">
-                            jouer
+                            Jouer
                         </button>
                     </div>
 
