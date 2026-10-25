@@ -967,6 +967,29 @@ function grilleCorrecte() {
     return true
 }
 
+function nomDuNiveau() {
+    if (proportionACacher.value === 30) {
+        return "Facile"
+    }
+    if (proportionACacher.value === 50) {
+        return "Moyen"
+    }
+    if (proportionACacher.value === 70) {
+        return "Difficile"
+    }
+}
+
+function texteNiveau() {
+    if (tailleDeGrille.value === 4) {
+        return 'text-green-500'
+    }
+    if (tailleDeGrille.value === 6) {
+        return 'text-yellow-500'
+    }
+    if (tailleDeGrille.value === 8) {
+        return 'text-rose-400'
+    }
+}
 
 
 </script>
@@ -974,7 +997,6 @@ function grilleCorrecte() {
 <template>
     <div :class="fondCouleur()" class=" flex items-center justify-center min-h-screen">
         <div class="flex flex-col items-center justify-center py-8  ">
-
             <div v-if="écran === 'jeu'" class="flex items-stretch gap-2">
                 <div class="flex flex-col bg-white rounded-2xl shadow items-center justify-center gap-4 min-h-96">
                     <div>
@@ -1033,9 +1055,16 @@ function grilleCorrecte() {
                     </div>
                 </div>
                 <div class="bg-white w-110 rounded-3xl shadow-md p-4 flex flex-col items-center justify-center gap-4">
-                    <div>
+                    <div class="flex flex-col items-center justify-center -mb-2">
                         <h1 class="text-blue-950 text-4xl font-bold font-['BagelFatOne']">Binoxxo</h1>
+                        <div>
+                            <p class="text-sm" :class="texteNiveau()">
+                                {{ nomDuNiveau() }} </p>
+                        </div>
                     </div>
+
+
+
 
                     <div class="grid gap-1 w-fit"
                         :style="{ gridTemplateColumns: 'repeat(' + tailleDeGrille + ', minmax(0, 1fr))' }">
